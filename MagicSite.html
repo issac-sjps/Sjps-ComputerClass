@@ -2,7 +2,9 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+  <meta name="mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
   <title>魔法小學堂 — 科目索引</title>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet"/>
   <style>
@@ -67,7 +69,7 @@
 
     /* Pills */
     .pills{display:none;gap:7px;flex-wrap:wrap;justify-content:center;margin-bottom:28px}
-    .pill{padding:5px 14px;border-radius:40px;font-size:12px;font-weight:700;cursor:pointer;
+    .pill{padding:10px 22px;border-radius:40px;font-size:16px;font-weight:700;cursor:pointer;
       border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--muted);transition:all .14s}
     .pill.on,.pill:hover{color:#fff;border-color:transparent}
     .pill.on[data-s="全部"]{background:linear-gradient(135deg,var(--a1),var(--a2))}
@@ -89,20 +91,39 @@
     .sc{font-size:11px;color:var(--muted);background:rgba(255,255,255,.06);border-radius:40px;padding:3px 10px}
 
     /* Grade groups */
-    .gg{margin-bottom:12px}
-    .gl{font-size:10.5px;font-weight:700;color:var(--muted);letter-spacing:.8px;
-      text-transform:uppercase;margin-bottom:6px;padding-left:2px}
+    .gg{margin-bottom:16px}
+    .gl{font-size:16px;font-weight:700;color:var(--text);letter-spacing:.5px;
+      margin-bottom:10px;padding-left:2px}
 
-    /* Link grid */
-    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
-    a.card{background:#1c2138;border:1px solid rgba(255,255,255,.18);border-radius:10px;
-      padding:14px 16px;text-decoration:none;color:var(--text);transition:all .16s;
-      display:flex;flex-direction:column;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    /* Link grid - tablet optimized */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+    a.card{background:#1c2138;border:1px solid rgba(255,255,255,.18);border-radius:14px;
+      padding:18px 20px;text-decoration:none;color:var(--text);transition:all .16s;
+      display:flex;flex-direction:column;gap:7px;box-shadow:0 2px 8px rgba(0,0,0,.3);
+      min-height:90px}
     a.card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.35);
       background:#232b4a;box-shadow:0 8px 22px rgba(0,0,0,.5)}
-    a.card .cn{font-size:15px;font-weight:700;line-height:1.35}
-    a.card .ci{font-size:11px;color:var(--muted);font-family:monospace}
-    a.card .ar{font-size:12px;color:var(--muted);margin-top:auto;padding-top:5px}
+    a.card:active{transform:scale(.97)}
+    a.card .cn{font-size:18px;font-weight:700;line-height:1.35}
+    a.card .ci{font-size:12px;color:var(--muted);font-family:monospace}
+    a.card .ar{font-size:13px;color:var(--muted);margin-top:auto;padding-top:6px}
+
+    /* Tablet media tweaks */
+    @media(max-width:900px){
+      .wrap{padding:0 16px 60px}
+      .hero{padding:44px 12px 32px}
+      h1{font-size:2.2rem}
+      .grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+      .pills{gap:8px}
+      .pill{padding:12px 20px;font-size:17px}
+      .st{font-size:1.2rem}
+      .gl{font-size:17px}
+    }
+    @media(max-width:600px){
+      .grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
+      .pill{padding:11px 16px;font-size:15px}
+      a.card .cn{font-size:16px}
+    }
 
     /* Log */
     #log{font-size:11px;color:var(--muted);max-height:110px;overflow-y:auto;
