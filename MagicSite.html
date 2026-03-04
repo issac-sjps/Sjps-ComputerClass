@@ -95,14 +95,14 @@
 
     /* Link grid */
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:8px}
-    a.card{background:var(--card);border:1px solid var(--border);border-radius:10px;
-      padding:12px 14px;text-decoration:none;color:var(--text);transition:all .16s;
-      display:flex;flex-direction:column;gap:4px}
-    a.card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.15);
-      box-shadow:0 8px 20px rgba(0,0,0,.4)}
-    a.card .cn{font-size:13px;font-weight:700;line-height:1.3}
-    a.card .ci{font-size:9.5px;color:var(--muted);font-family:monospace}
-    a.card .ar{font-size:10.5px;color:var(--muted);margin-top:auto;padding-top:4px}
+    a.card{background:#1c2138;border:1px solid rgba(255,255,255,.18);border-radius:10px;
+      padding:14px 16px;text-decoration:none;color:var(--text);transition:all .16s;
+      display:flex;flex-direction:column;gap:5px;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+    a.card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.35);
+      background:#232b4a;box-shadow:0 8px 22px rgba(0,0,0,.5)}
+    a.card .cn{font-size:15px;font-weight:700;line-height:1.35}
+    a.card .ci{font-size:11px;color:var(--muted);font-family:monospace}
+    a.card .ar{font-size:12px;color:var(--muted);margin-top:auto;padding-top:5px}
 
     /* Log */
     #log{font-size:11px;color:var(--muted);max-height:110px;overflow-y:auto;
@@ -126,14 +126,10 @@
 
   <input type="hidden" id="apiKey" value=""/>
 
-  <div class="ctrl">
-    <button class="btn bp" id="mainBtn" onclick="start()">🚀 載入所有連結</button>
-    <button class="btn bg" onclick="toggleLog()">🪵 日誌</button>
-    <button class="btn bg" onclick="copyAll()">📋 複製全部</button>
-  </div>
+  <input type="hidden" id="mainBtn"/>
 
   <div id="pbar"><div id="pfill"></div></div>
-  <div id="status">點選「載入所有連結」開始</div>
+  <div id="status"></div>
   <div id="log"></div>
 
   <div class="pills" id="pills">
@@ -169,20 +165,12 @@ const DEFS=[
 
 let allData=[],cf='全部',loaded=false,logVis=false;
 
+window.addEventListener('load', start);
+
 async function start(){
   if(loaded)return;
-  const btn=document.getElementById('mainBtn');
-  btn.disabled=true;btn.innerHTML='<span class="spin"></span>載入中...';
   pbar(0);log('開始...');
-
-  const key=document.getElementById('apiKey').value.trim();
-  if(key){
-    log('有 API Key，呼叫 Claude API + web_search 搜尋真實 contentId...');
-    await aiLoad(key);
-  } else {
-    log('無 API Key，使用內建推測格式...');
-    await builtIn();
-  }
+  await builtIn();
 }
 
 // ── AI 模式 ──────────────────────────────────────────────────────
@@ -255,10 +243,9 @@ async function builtIn(){
 
 function done(tot,src){
   pbar(100);loaded=true;
-  st(`✅ 已整理 <strong>${tot}</strong> 個連結（${src}）`);
+  st(`✅ 已整理 <strong>${tot}</strong> 個連結`);
   document.getElementById('pbar').style.display='none';
   document.getElementById('pills').style.display='flex';
-  document.getElementById('mainBtn').innerHTML='✅ 載入完成';
   render();
 }
 
