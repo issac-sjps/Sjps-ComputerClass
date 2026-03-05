@@ -393,13 +393,31 @@
 <!-- =============================== TEACHER VIEW =============================== -->
 <div id="screen-teacher-view" style="display:none;">
   <div class="topbar">
-    <div class="topbar-title">🎨 小畫家作品展示</div>
+    <div class="topbar-title">🎨 小畫家作品評選系統</div>
     <div class="topbar-role" id="teacher-role-label">導師</div>
     <button class="btn-logout" onclick="logout()">離開</button>
   </div>
-  <div style="padding:2rem;">
+  <div class="tabs">
+    <div class="tab active" data-tab="t-evaluate" onclick="switchTeacherTab('t-evaluate')">⭐ 評選模式</div>
+    <div class="tab" data-tab="t-display" onclick="switchTeacherTab('t-display')">🖼️ 展示模式</div>
+  </div>
+
+  <!-- ── TEACHER EVAL TAB ── -->
+  <div class="tab-content active" id="tab-t-evaluate">
+    <div class="eval-container">
+      <div class="section-title">⭐ 評選模式 <span style="font-size:0.8rem;color:var(--mid);font-weight:400;">（唯讀，推薦結果由電腦老師決定）</span></div>
+      <div class="eval-controls">
+        <div style="font-size:0.95rem; color:var(--teal); font-weight:700;" id="teacher-eval-class-badge"></div>
+        <div class="recommend-counter" id="teacher-recommend-counter" style="display:none;">推薦人數：0 / 2</div>
+      </div>
+      <div id="teacher-eval-content" style="text-align:center; padding:3rem; color:var(--mid);">載入中...</div>
+    </div>
+  </div>
+
+  <!-- ── TEACHER DISPLAY TAB ── -->
+  <div class="tab-content" id="tab-t-display">
     <div class="display-container">
-      <div class="section-title">🖼️ 班級作品展示</div>
+      <div class="section-title">🖼️ 展示模式</div>
       <div class="display-controls">
         <select class="control-select" id="teacher-theme-select" onchange="loadTeacherDisplay()">
           <option value="">-- 選擇主題 --</option>
@@ -493,6 +511,14 @@ function teacherLogin() {
   document.getElementById('screen-teacher-view').style.display = 'block';
   document.getElementById('teacher-role-label').textContent = cls + '班 導師';
   document.getElementById('teacher-class-badge').innerHTML = `<strong style="color:var(--teal);">${cls}班</strong>`;
+  document.getElementById('teacher-eval-class-badge').textContent = cls + '班';
+  loadTeacherEval();
+}
+function switchTeacherTab(tab) {
+  document.querySelectorAll('#screen-teacher-view .tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#screen-teacher-view .tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+  document.getElementById(`tab-${tab}`).classList.add('active');
 }
 function logout() {
   currentRole = null; currentTeacherClass = null;
@@ -736,6 +762,111 @@ function updateRecommendCounter() {
   const el = document.getElementById('recommend-counter');
   el.textContent = `推薦人數：${evalRecommended.length} / 2`;
   el.className = 'recommend-counter' + (evalRecommended.length >= 2 ? ' full' : '');
+}
+
+// ══════════════════════════════════
+// TEACHER EVAL (read-only)
+// ══════════════════════════════════
+let tEvalStudents = [];
+let tEvalIndex = 0;
+let tEvalRecommended = [];
+
+async function loadTeacherEval() {
+  const cls = currentTeacherClass;
+  const content = document.getElementById('teacher-eval-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div>載入名單中...</div>';
+  try {
+    const [docSnap, recSnap] = await Promise.all([
+      db.collection('classes').doc(cls).get(),
+      db.collection('recommendations').doc(cls).get()
+    ]);
+    if (!docSnap.exists || !docSnap.data().students || docSnap.data().students.length === 0) {
+      content.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--mid);">⚠️ 此班尚無名單</div>';
+      return;
+    }
+    tEvalStudents = [...docSnap.data().students].sort((a, b) => a.num - b.num);
+    tEvalRecommended = recSnap.exists ? (recSnap.data().list || []) : [];
+    tEvalIndex = 0;
+    updateTeacherCounter();
+    renderTeacherEvalCard();
+  } catch(e) {
+    content.innerHTML = `<div style="text-align:center;padding:3rem;color:var(--coral);">載入失敗：${e.message}</div>`;
+  }
+}
+
+function renderTeacherEvalCard() {
+  const cls = currentTeacherClass;
+  if (!tEvalStudents.length) return;
+  const student = tEvalStudents[tEvalIndex];
+  const studentId = cls + String(student.num).padStart(2, '0');
+  const isRec = tEvalRecommended.includes(student.num);
+
+  const thumbs = tEvalStudents.map((s, i) => {
+    const r = tEvalRecommended.includes(s.num);
+    const a = i === tEvalIndex;
+    const c = [a && 'active', r && 'recommended'].filter(Boolean).join(' ');
+    return `<button class="thumb-btn ${c}" onclick="tGoToStudent(${i})">${String(s.num).padStart(2,'0')} ${s.name}</button>`;
+  }).join('');
+
+  const artworks = Object.entries(THEMES).map(([key, name]) => {
+    const url = getImgUrl(key, studentId);
+    return `<div class="artwork-card">
+      <div class="artwork-theme-label">${name}</div>
+      <div class="artwork-img-wrap" onclick="openLightbox('${url}')">
+        <img src="${url}" alt="${name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+        <div class="no-artwork-msg" style="display:none;">尚無作品</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const recBadge = isRec
+    ? `<div style="background:var(--gold);color:var(--dark);padding:0.55rem 1.4rem;border-radius:50px;font-weight:700;font-size:0.95rem;">⭐ 電腦老師推薦</div>`
+    : `<div style="background:var(--cream);color:var(--mid);padding:0.55rem 1.4rem;border-radius:50px;font-size:0.9rem;">未入選推薦</div>`;
+
+  const tags = tEvalRecommended.length === 0
+    ? '<span style="color:var(--mid);font-size:0.85rem;">電腦老師尚未推薦任何同學</span>'
+    : tEvalRecommended.map(n => {
+        const s = tEvalStudents.find(x => x.num === n);
+        return `<div class="recommended-tag">⭐ ${String(n).padStart(2,'0')} ${s ? s.name : '?'}</div>`;
+      }).join('');
+
+  document.getElementById('teacher-eval-content').innerHTML = `
+    <div style="margin-bottom:1rem;">
+      <div style="font-size:0.78rem;color:var(--mid);margin-bottom:0.5rem;">快速導覽（金色＝已推薦）：</div>
+      <div class="students-thumbnail-nav">${thumbs}</div>
+    </div>
+    <div class="eval-student-card">
+      <div class="eval-student-header">
+        <div class="student-identity">
+          <div class="student-num-circle">${student.num}</div>
+          <div>
+            <div class="student-name">${student.name}</div>
+            <div class="student-id-label">座號 ${studentId}</div>
+          </div>
+        </div>
+        ${recBadge}
+      </div>
+      <div class="artworks-grid">${artworks}</div>
+      <div class="eval-nav">
+        <button class="btn-nav" onclick="tPrevStudent()" ${tEvalIndex === 0 ? 'disabled' : ''}>← 上一位</button>
+        <div class="eval-progress">${tEvalIndex + 1} / ${tEvalStudents.length}</div>
+        <button class="btn-nav" onclick="tNextStudent()" ${tEvalIndex === tEvalStudents.length - 1 ? 'disabled' : ''}>下一位 →</button>
+      </div>
+    </div>
+    <div class="recommended-list">
+      <h4>⭐ 電腦老師推薦名單</h4>
+      <div class="recommended-tags">${tags}</div>
+    </div>`;
+}
+
+function tGoToStudent(i) { tEvalIndex = i; renderTeacherEvalCard(); }
+function tPrevStudent() { if (tEvalIndex > 0) { tEvalIndex--; renderTeacherEvalCard(); } }
+function tNextStudent() { if (tEvalIndex < tEvalStudents.length - 1) { tEvalIndex++; renderTeacherEvalCard(); } }
+function updateTeacherCounter() {
+  const el = document.getElementById('teacher-recommend-counter');
+  el.style.display = 'inline-block';
+  el.textContent = `推薦人數：${tEvalRecommended.length} / 2`;
+  el.className = 'recommend-counter' + (tEvalRecommended.length >= 2 ? ' full' : '');
 }
 
 // ══════════════════════════════════
