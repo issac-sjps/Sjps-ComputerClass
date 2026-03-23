@@ -1,1 +1,123 @@
-123
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的電腦課作品集 | SJPS Computer Class</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background-color: #4a90e2;
+            color: white;
+            text-align: center;
+            padding: 2rem 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header p {
+            margin-top: 10px;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        .container {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid #4a90e2;
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        .card h2 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .card p {
+            color: #666;
+            flex-grow: 1;
+        }
+        .card a {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 20px;
+            background-color: #4a90e2;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            text-align: center;
+            transition: background-color 0.3s;
+        }
+        .card a:hover {
+            background-color: #357abd;
+        }
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #777;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>電腦課作品集</h1>
+        <p>歡迎來到我的個人網站！這裡收錄了我在電腦課製作的各項網頁專案。</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>✨ 魔術網站</h2>
+            <p>探索神奇的魔術世界！這裡展示了一些有趣的視覺特效或是魔術相關的介紹內容。</p>
+            <a href="MagicSite.html">前往 MagicSite</a>
+        </div>
+
+        <div class="card">
+            <h2>📸 相片圖庫</h2>
+            <p>我的個人相簿與圖庫展示，來看看我收集或拍攝的精彩照片吧。</p>
+            <a href="PhotoLibrary.html">前往 PhotoLibrary</a>
+        </div>
+
+        <div class="card">
+            <h2>🎮 Roblox 教學</h2>
+            <p>想學習怎麼玩或開發 Roblox 嗎？這裡記錄了實用的 Roblox 教學與心得分享。</p>
+            <a href="RobloxTeaching.html">前往 RobloxTeaching</a>
+        </div>
+
+        <div class="card">
+            <h2>⏱️ 計時器工具</h2>
+            <p>一個實用的網頁版計時器工具，可以用來倒數計時或是記錄時間。</p>
+            <a href="timer.html">前往 Timer</a>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 issac-sjps. GitHub Pages: <a href="https://issac-sjps.github.io/Sjps-ComputerClass/" style="color: #4a90e2; text-decoration: none;">Sjps-ComputerClass</a></p>
+    </footer>
+
+</body>
+</html>
