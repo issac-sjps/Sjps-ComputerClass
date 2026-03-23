@@ -17,7 +17,7 @@
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            padding: 30px;
+            padding: 40px 30px;
             border-radius: 15px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
@@ -30,7 +30,7 @@
         .mode-btn.active { background: #3498db; color: white; }
         
         #timer-display {
-            font-size: 120px; font-weight: bold; margin: 20px 0;
+            font-size: 140px; font-weight: bold; margin: 20px 0;
             color: #e74c3c; font-family: monospace;
         }
         
@@ -47,12 +47,14 @@
         .setup-area { margin: 15px 0; font-size: 20px; }
         .setup-area input { font-size: 20px; width: 60px; text-align: center; }
 
-        .scoreboard {
-            display: flex; justify-content: space-around; margin-top: 40px;
-            padding-top: 20px; border-top: 3px dashed #bdc3c7;
+        /* 快速設定按鈕的樣式 */
+        .quick-set { margin: 20px 0; }
+        .quick-btn {
+            font-size: 18px; padding: 10px 15px; margin: 5px; cursor: pointer;
+            border: 2px solid #16a085; border-radius: 8px; background: #e8f8f5; 
+            color: #16a085; font-weight: bold; transition: 0.2s;
         }
-        .team { font-size: 24px; }
-        .score { font-size: 60px; font-weight: bold; color: #2980b9; display: block; margin: 10px 0;}
+        .quick-btn:hover { background: #16a085; color: white; }
         .score-btn {
             font-size: 20px; padding: 5px 15px; margin: 2px; cursor: pointer;
             border: none; border-radius: 5px; background: #34495e; color: white;
@@ -65,15 +67,27 @@
     <h1>⏱️ 課堂互動計時器</h1>
     
     <div>
-        <button id="btn-up" class="mode-btn" onclick="setMode('up')">正計時</button>
         <button id="btn-down" class="mode-btn active" onclick="setMode('down')">倒數計時</button>
+        <button id="btn-up" class="mode-btn" onclick="setMode('up')">正計時</button>
     </div>
 
     <div id="setup-area" class="setup-area">
-        設定倒數時間：
-        <input type="number" id="set-min" value="5" min="0"> 分 
-        <input type="number" id="set-sec" value="0" min="0" max="59"> 秒
-        <button class="score-btn" onclick="applyTime()">設定</button>
+        <div class="quick-set">
+            快速設定：
+            <button class="quick-btn" onclick="setQuickTime(5)">5 分</button>
+            <button class="quick-btn" onclick="setQuickTime(10)">10 分</button>
+            <button class="quick-btn" onclick="setQuickTime(15)">15 分</button>
+            <button class="quick-btn" onclick="setQuickTime(20)">20 分</button>
+            <button class="quick-btn" onclick="setQuickTime(25)">25 分</button>
+            <button class="quick-btn" onclick="setQuickTime(30)">30 分</button>
+        </div>
+        
+        <div style="margin-top: 15px;">
+            自訂時間：
+            <input type="number" id="set-min" value="5" min="0"> 分 
+            <input type="number" id="set-sec" value="0" min="0" max="59"> 秒
+            <button class="score-btn" onclick="applyTime()">設定</button>
+        </div>
     </div>
 
     <div id="timer-display">05:00</div>
@@ -84,21 +98,6 @@
         <button class="btn-reset" onclick="resetTimer()">🔄 重置</button>
         <button class="btn-add-time" onclick="addSeconds(10)">+10秒</button>
         <button class="btn-add-time" onclick="addSeconds(30)">+30秒</button>
-    </div>
-
-    <div class="scoreboard">
-        <div class="team">
-            <div>第一組</div>
-            <span class="score" id="score-1">0</span>
-            <button class="score-btn" onclick="changeScore(1, 1)">+1 分</button>
-            <button class="score-btn" style="background:#c0392b;" onclick="changeScore(1, -1)">-1 分</button>
-        </div>
-        <div class="team">
-            <div>第二組</div>
-            <span class="score" id="score-2">0</span>
-            <button class="score-btn" onclick="changeScore(2, 1)">+1 分</button>
-            <button class="score-btn" style="background:#c0392b;" onclick="changeScore(2, -1)">-1 分</button>
-        </div>
     </div>
 </div>
 
@@ -122,14 +121,14 @@
 
     // 語音提醒
     function playTimeUpSound() {
-        // 使用瀏覽器內建語音合成
         if ('speechSynthesis' in window) {
-            let msg = new SpeechSynthesisUtterance("時間到囉！");
+            // 讓語音連續講三次
+            let msg = new SpeechSynthesisUtterance("時間到囉！ 時間到囉！ 時間到囉！");
             msg.lang = 'zh-TW';
-            msg.rate = 1.0; // 語速
+            msg.rate = 1.0; 
             window.speechSynthesis.speak(msg);
         } else {
-            alert("時間到囉！"); // 若瀏覽器不支援語音的備案
+            alert("時間到囉！ 時間到囉！ 時間到囉！"); 
         }
     }
 
@@ -158,6 +157,15 @@
         let m = parseInt(document.getElementById("set-min").value) || 0;
         let s = parseInt(document.getElementById("set-sec").value) || 0;
         totalSeconds = (m * 60) + s;
+        updateDisplay();
+    }
+
+    // 快速設定時間
+    function setQuickTime(minutes) {
+        pauseTimer(); // 設定時間時先暫停
+        document.getElementById("set-min").value = minutes;
+        document.getElementById("set-sec").value = 0;
+        totalSeconds = minutes * 60;
         updateDisplay();
     }
 
@@ -201,17 +209,8 @@
     // 隨時加秒數
     function addSeconds(sec) {
         totalSeconds += sec;
-        if(totalSeconds < 0) totalSeconds = 0; // 防止變成負數
+        if(totalSeconds < 0) totalSeconds = 0; 
         updateDisplay();
-    }
-
-    // 改變分數
-    function changeScore(team, points) {
-        let scoreElement = document.getElementById("score-" + team);
-        let currentScore = parseInt(scoreElement.innerText);
-        currentScore += points;
-        if(currentScore < 0) currentScore = 0; // 不讓分數變負的
-        scoreElement.innerText = currentScore;
     }
 
     // 初始化
