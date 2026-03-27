@@ -747,7 +747,10 @@ function renderDisplayGrid(container,students,cls,theme,recommended){
 }
 
 // UTILS
-function getImgUrl(theme,sid){return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(theme)}/${sid}.png`;}
+function getImgUrl(theme,sid){
+  const folder=encodeURIComponent(theme); // 只編碼資料夾名稱，斜線由外部處理
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${folder}/${sid}.png`;
+}
 function setMsg(el,text,colorVar){el.textContent=text;el.style.color=`var(--${colorVar})`;}
 function openLightbox(url){document.getElementById('lightbox').style.display='flex';document.getElementById('lightbox-img').src=url;}
 function closeLightbox(){document.getElementById('lightbox').style.display='none';}
