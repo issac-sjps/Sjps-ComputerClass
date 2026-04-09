@@ -41,18 +41,22 @@
         .badge { display: inline-block; background: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; color: #d35400; }
         
         /* 條列式優缺點 */
-        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
         .list-item { margin-bottom: 8px; font-size: 0.95rem; line-height: 1.6; }
         .check-icon { color: #27ae60; margin-right: 5px; }
         .warn-icon { color: #e67e22; margin-right: 5px; }
 
-        /* 任務與名人 */
+        /* 任務 */
         .mission-box { background: #FFF9E6; border: 2px dashed #F1C40F; padding: 20px; border-radius: 12px; margin-top: 20px; }
-        .famous-box { background: #E8F8F5; padding: 20px; border-radius: 12px; margin-top: 20px; }
         
-        /* 關鍵字連結 */
+        /* 連結標籤 (關鍵字 & 名人) */
         .kw-tag { display: inline-block; background: white; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--secondary); margin: 4px; color: var(--secondary); text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
-        .kw-tag:hover { background: var(--secondary); color: white; transform: scale(1.1); }
+        .kw-tag:hover { background: var(--secondary); color: white; transform: scale(1.05); }
+        .famous-tag { border-color: #3498db; color: #3498db; }
+        .famous-tag:hover { background: #3498db; color: white; }
+
+        /* 靜態職業標籤 */
+        .job-tag { display: inline-block; background: #FFF5F5; border: 1px solid #FF6B6B; color: #FF6B6B; padding: 6px 12px; border-radius: 8px; margin: 4px; font-weight: bold; font-size: 0.95rem; }
 
         .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
 
@@ -203,11 +207,12 @@
         ]}
     ];
 
+    // 更新 careerData：將名人改為陣列，方便自動生成超連結
     const careerData = {
         "R": {
             type: "實作英雄 (Realistic)",
-            jobs: ["機器人工程師", "外科醫師", "無人機操作員", "五星級主廚"],
-            famous: "特斯拉創辦人 Elon Musk、頂級主廚 Gordon Ramsay",
+            jobs: ["機器人工程師", "外科醫師", "無人機操作員", "五星級主廚", "自動化技師"],
+            famous: ["Elon Musk (特斯拉創辦人)", "Gordon Ramsay (頂級主廚)", "吳寶春 (世界麵包冠軍)"],
             pros: ["專業技術不易被 AI 取代", "成就感非常直接（做完就能看到成果）", "工作內容不枯燥，通常在動態環境"],
             cons: ["體力消耗較大，需要強健的體魄", "工作環境可能較嘈雜或有受傷風險", "通常需要長時間站立或精密操作"],
             mission: "本週試著修理家中一樣壞掉的小東西，或親自幫家人組裝一件家具！",
@@ -215,8 +220,8 @@
         },
         "I": {
             type: "智慧學者 (Investigative)",
-            jobs: ["數據分析師", "藥物研發員", "天文學家", "刑事鑑識專家"],
-            famous: "物理學家 愛因斯坦、居禮夫人",
+            jobs: ["數據分析師", "藥物研發員", "天文學家", "刑事鑑識專家", "AI演算法工程師"],
+            famous: ["愛因斯坦 (物理學家)", "居禮夫人 (化學家)", "唐鳳 (程式開發者)"],
             pros: ["薪資潛力高，屬於知識密集產業", "工作時間相對彈性穩定", "每天都在接觸世界最前端的知識"],
             cons: ["需要長時間專注，眼力負擔較大", "研究結果可能要數年才會顯現", "工作內容有時較為孤獨寂寞"],
             mission: "去圖書館借閱一本關於自然科學或天文的書，並跟家人分享一個最酷的冷知識！",
@@ -224,8 +229,8 @@
         },
         "A": {
             type: "創意魔法師 (Artistic)",
-            jobs: ["遊戲美術設計", "影視編劇", "室內設計師", "流行樂手"],
-            famous: "動畫大師 宮崎駿、華特·迪士尼",
+            jobs: ["遊戲美術設計", "影視編劇", "室內設計師", "流行樂手", "UI/UX設計師"],
+            famous: ["宮崎駿 (動畫大師)", "華特迪士尼", "周杰倫 (音樂製作人)"],
             pros: ["生活充滿趣味，工作就是玩樂", "可以發揮個人風格，影響人們的情緒", "不需要待在傳統辦公室"],
             cons: ["接案初期收入可能不穩定", "容易遇到靈感枯竭的壓力", "經常需要熬夜趕稿或應付修改需求"],
             mission: "利用這週末，畫一張關於「30年後的我」的畫作，或錄製一段自己的音樂分享給朋友！",
@@ -233,8 +238,8 @@
         },
         "S": {
             type: "暖心領航員 (Social)",
-            jobs: ["心理諮商師", "特教老師", "物理治療師", "社會企業創業者"],
-            famous: "泰瑞莎修女、馬拉拉",
+            jobs: ["心理諮商師", "特教老師", "物理治療師", "社會企業創業者", "人資主管"],
+            famous: ["泰瑞莎修女", "馬拉拉 (諾貝爾和平獎得主)", "阿德勒 (心理學家)"],
             pros: ["被需要的感覺帶來極大心靈幸福", "工作回饋感極強", "人際技能讓你在生活中處處受歡迎"],
             cons: ["容易吸收他人的負面情緒導致疲累", "處理複雜的人際糾紛非常耗心神", "需要極大的耐心與溝通體力"],
             mission: "本週主動觀察一位心情不好的同學，並給予一個簡單的關心或小零食，觀察他的反應！",
@@ -242,8 +247,8 @@
         },
         "E": {
             type: "果敢領袖 (Enterprising)",
-            jobs: ["科技創業家", "行銷總監", "產品經理(PM)", "外交官"],
-            famous: "賈伯斯 Steve Jobs、歐普拉",
+            jobs: ["科技創業家", "行銷總監", "產品經理(PM)", "外交官", "活動企劃"],
+            famous: ["Steve Jobs 賈伯斯", "歐普拉 (知名主持人)", "馬雲 (阿里巴巴創辦人)"],
             pros: ["擁有高度的決策權與主導感", "收入增長潛力最高", "生活充滿挑戰與變動，極富冒險感"],
             cons: ["必須承擔失敗與賠錢的風險", "工作與生活很難切分開來", "需要經常面對衝突與高壓談判"],
             mission: "下週跟老師爭取擔任班級或小組的負責人，嘗試規劃一個大家都能參與的小活動！",
@@ -251,8 +256,8 @@
         },
         "C": {
             type: "秩序守護者 (Conventional)",
-            jobs: ["資安分析師", "精算師", "物流專家", "律師"],
-            famous: "股神 巴菲特、蘋果執行長 Tim Cook",
+            jobs: ["資安分析師", "精算師", "物流專家", "律師", "品保工程師"],
+            famous: ["巴菲特 (股神)", "Tim Cook (蘋果執行長)", "福爾摩斯 (推理邏輯大師)"],
             pros: ["工作穩定性最高，受到企業高度信任", "專業度極強，隨著資歷薪資穩定成長", "生活作息非常有規律"],
             cons: ["工作內容重複性較高，可能感到單調", "對精確度要求極高，不能出錯的壓力大", "通常需要坐在辦公室處理大量數據"],
             mission: "將自己的書桌或房間進行一次徹底的分類整理，並畫出一張屬於自己的作息時間表！",
@@ -331,13 +336,19 @@
         const data = careerData[topType];
         document.getElementById('job-type-name').innerText = data.type;
 
-        // 行為解析（隨機3條）
         const selectedReasons = reasons.sort(() => 0.5 - Math.random()).slice(0, 3);
         document.getElementById('behavior-analysis').innerHTML = `💡 <b>從測驗看你的天賦：</b><br>● ${selectedReasons.join('<br>● ')}`;
 
         const recArea = document.getElementById('career-recommendations');
         recArea.innerHTML = `
             <div class="career-section">
+                <div class="info-box">
+                    <span class="badge">💼 推薦職業名單</span>
+                    <div style="margin-top:10px;">
+                        ${data.jobs.map(j => `<span class="job-tag">${j}</span>`).join('')}
+                    </div>
+                </div>
+
                 <div class="pros-cons-grid">
                     <div class="info-box">
                         <span class="badge">🌟 職場優點分析</span>
@@ -350,8 +361,12 @@
                 </div>
 
                 <div class="info-box">
-                    <span class="badge" style="background:#3498db; color:white">🏆 英雄榜：代表人物</span>
-                    <p><b>你可以搜尋：</b> ${data.famous}</p>
+                    <span class="badge" style="background:#3498db; color:white">🏆 英雄榜：代表人物 (點擊搜尋)</span>
+                    <div style="margin-top:10px;">
+                        ${data.famous.map(f => `
+                            <a href="https://www.google.com/search?q=${f}" target="_blank" class="kw-tag famous-tag">🔍 ${f}</a>
+                        `).join('')}
+                    </div>
                 </div>
 
                 <div class="mission-box">
