@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>未來英雄學院 - 深度職涯雷達分析</title>
+    <title>未來英雄學院 - 專業職涯引導系統</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -14,7 +14,7 @@
         }
 
         body { font-family: 'Noto Sans TC', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        #game-container { background: var(--white); max-width: 850px; margin: 0 auto; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        #game-container { background: var(--white); max-width: 900px; margin: 0 auto; padding: 40px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
 
         /* 導航跳轉點 */
         .nav-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 30px; flex-wrap: wrap; }
@@ -23,237 +23,246 @@
         .dot.completed { background: var(--done); }
 
         h2 { font-size: 1.4rem; color: var(--text); margin-bottom: 25px; line-height: 1.5; text-align: center; }
-        .options-grid { display: grid; grid-template-columns: 1fr; gap: 15px; }
+        .options-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
         
-        .btn { padding: 18px; border-radius: 12px; border: 2px solid #E0E0E0; background: white; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
-        .btn:hover { border-color: var(--secondary); background: #F7FFFE; transform: translateY(-2px); }
+        .btn { padding: 16px 20px; border-radius: 12px; border: 2px solid #E0E0E0; background: white; text-align: left; cursor: pointer; transition: 0.2s; font-size: 1.1rem; }
+        .btn:hover { border-color: var(--secondary); background: #F7FFFE; transform: translateX(5px); }
         .btn.selected { border-color: var(--primary); background: #FFF5F5; }
 
         .nav-controls { display: flex; justify-content: space-between; margin-top: 30px; }
-        .control-btn { padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .control-btn:hover { opacity: 0.9; }
+        .control-btn { padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
         .prev-btn { background: #BDC3C7; color: white; }
         .submit-btn { background: var(--done); color: white; display: none; }
 
         /* 結果頁面樣式 */
         .result-card { display: none; animation: fadeIn 0.8s; }
-        .career-section { background: #F9FAFB; border-radius: 15px; padding: 25px; margin-top: 20px; border-left: 10px solid var(--secondary); }
-        .grid-info { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 15px; }
-        .info-box { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .badge { display: inline-block; background: var(--accent); padding: 3px 10px; border-radius: 5px; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; }
+        .career-section { border-radius: 15px; margin-top: 20px; }
+        .info-box { background: #F9FAFB; padding: 20px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #eee; }
+        .badge { display: inline-block; background: var(--accent); padding: 4px 12px; border-radius: 6px; font-size: 0.9rem; margin-bottom: 10px; font-weight: bold; color: #d35400; }
         
-        .chart-container { width: 100%; max-width: 450px; margin: 20px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .search-keywords { background: #E0F7FA; padding: 15px; border-radius: 10px; margin-top: 15px; }
-        
-        .hidden { display: none; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* 條列式優缺點 */
+        .pros-cons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .list-item { margin-bottom: 8px; font-size: 0.95rem; line-height: 1.6; }
+        .check-icon { color: #27ae60; margin-right: 5px; }
+        .warn-icon { color: #e67e22; margin-right: 5px; }
 
-        @media (max-width: 600px) {
-            .grid-info { grid-template-columns: 1fr; }
-            #game-container { padding: 20px; }
+        /* 任務與名人 */
+        .mission-box { background: #FFF9E6; border: 2px dashed #F1C40F; padding: 20px; border-radius: 12px; margin-top: 20px; }
+        .famous-box { background: #E8F8F5; padding: 20px; border-radius: 12px; margin-top: 20px; }
+        
+        /* 關鍵字連結 */
+        .kw-tag { display: inline-block; background: white; padding: 6px 14px; border-radius: 20px; border: 1px solid var(--secondary); margin: 4px; color: var(--secondary); text-decoration: none; font-weight: bold; font-size: 0.9rem; transition: 0.3s; }
+        .kw-tag:hover { background: var(--secondary); color: white; transform: scale(1.1); }
+
+        .chart-container { width: 100%; max-width: 400px; margin: 0 auto; }
+
+        /* 列印優化 */
+        @media print {
+            .nav-controls, .prev-btn, .nav-dots, .control-btn { display: none !important; }
+            body { background: white; }
+            #game-container { box-shadow: none; border: none; max-width: 100%; }
         }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
     <div id="start-screen">
-        <h1 style="text-align: center; color: var(--primary);">🎯 未來英雄：雷達探索系統</h1>
-        <p style="text-align: center;">這是一個包含 15 題的深度探索任務。<br>完成後，系統將為你生成專屬的「能力雷達圖」與未來分析報告！</p>
-        <button class="control-btn" style="background: var(--primary); color: white; display: block; margin: 30px auto; width: 200px; padding: 15px;" onclick="startQuiz()">開始深度測驗</button>
+        <h1 style="text-align: center; color: var(--primary);">🚀 未來英雄學院：深度職涯任務</h1>
+        <p style="text-align: center; font-size: 1.1rem; color: #666;">親愛的同學，你準備好探索自己的隱藏天賦了嗎？<br>這場 15 題的冒險將為你揭開通往未來的路徑。</p>
+        <button class="control-btn" style="background: var(--primary); color: white; display: block; margin: 30px auto; width: 220px; padding: 15px; font-size: 1.2rem;" onclick="startQuiz()">開始我的探索報告</button>
     </div>
 
     <div id="quiz-screen" class="hidden">
         <div class="nav-dots" id="nav-dots"></div>
-        <h2 id="question-text">載入中...</h2>
+        <h2 id="question-text">正在載入冒題...</h2>
         <div id="options-container" class="options-grid"></div>
         
         <div class="nav-controls">
-            <button class="control-btn prev-btn" id="prev-btn" onclick="prevQuestion()">← 上一題</button>
-            <button class="control-btn submit-btn" id="final-submit" onclick="showFinalResult()">分析數據並生成雷達圖 →</button>
+            <button class="control-btn prev-btn" id="prev-btn" onclick="prevQuestion()">← 返回上一題</button>
+            <button class="control-btn submit-btn" id="final-submit" onclick="showFinalResult()">生成我的英雄報告 →</button>
         </div>
     </div>
 
     <div id="result-screen" class="result-card">
-        <h1 id="top-title" style="text-align: center; color: var(--secondary);">你的專屬超能力報告</h1>
+        <h1 style="text-align: center; color: var(--secondary); margin-bottom: 5px;">🌟 探索報告：<span id="job-type-name"></span></h1>
+        <p style="text-align: center; color: #888; margin-bottom: 30px;">測驗日期：<span id="current-date"></span></p>
         
-        <div class="chart-container">
-            <h3 style="text-align: center; margin-top: 0;">📊 個人能力雷達圖</h3>
-            <canvas id="radarChart"></canvas>
-        </div>
-
-        <div class="info-box" style="border-top: 5px solid var(--primary); margin-top: 20px;">
-            <h3>🔍 行為解析（為什麼這樣推薦？）</h3>
-            <p id="behavior-analysis"></p>
+        <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: center; justify-content: center;">
+            <div class="chart-container"><canvas id="radarChart"></canvas></div>
+            <div style="flex: 1; min-width: 300px;">
+                <div class="info-box" style="border-left: 5px solid var(--primary);">
+                    <h3 style="margin-top:0;">🔍 你的天賦解析</h3>
+                    <p id="behavior-analysis" style="font-size: 0.95rem;"></p>
+                </div>
+            </div>
         </div>
 
         <div id="career-recommendations"></div>
 
-        <button class="control-btn" style="background: var(--primary); color: white; width: 100%; margin-top: 30px; padding: 15px;" onclick="location.reload()">重新進行探索</button>
+        <div class="nav-controls" style="margin-top: 40px;">
+            <button class="control-btn" style="background: #34495e; color: white;" onclick="window.print()">🖨️ 列印/儲存為 PDF 證書</button>
+            <button class="control-btn" style="background: var(--primary); color: white;" onclick="location.reload()">重新測驗</button>
+        </div>
     </div>
 </div>
 
 <script>
-    // 完整 15 題題庫
     const questions = [
-        { q: "1. 當你拿到一組全新的樂高積木時：", options: [
-            {t:"照說明書精準拼好，享受完成的成就感", y:"C", reason:"你展現了『精準執行』與『尊重規則』的特質，做事很有條理。"},
-            {t:"不看說明書，隨心所欲拼出自己的怪獸", y:"A", reason:"你擁有『破壞式創新』與『視覺空間感』，喜歡打破框架。"},
-            {t:"研究裡面特殊零件的機關原理", y:"I", reason:"你具備『分析思考』，對事物底層的運作邏輯充滿好奇。"},
-            {t:"找好朋友一起分工合作完成", y:"S", reason:"你重視『團隊協作』，喜歡與人互動並共同完成目標。"}
+        { q: "1. 拿到一組全新積木，你會怎麼開始？", options: [
+            {t:"📘 照說明書精準拼好，一步都不能錯", y:"C", reason:"你展現了『精準執行』與『尊重規則』，這在科學與法律領域非常重要。"},
+            {t:"👾 不看說明書，隨手拼出一個怪獸", y:"A", reason:"你具備『破壞式創新』天賦，喜歡挑戰現有的規律。"},
+            {t:"🧐 研究特殊的連接零件是怎麼設計的", y:"I", reason:"你擁有強烈的『好奇心』與『分析力』，喜歡探究事物真相。"},
+            {t:"🤝 找好朋友一起分工，一人拼一部分", y:"S", reason:"你具備『團隊協作』與『領導協調』雛形。"}
         ]},
-        { q: "2. 學校園遊會，你最想擔任哪個職位？", options: [
-            {t:"大聲叫賣，說服大家來買東西的銷售員", y:"E", reason:"你具備『溝通說服』與『領導氣質』，不害怕面對人群。"},
-            {t:"負責管錢、記帳，確保沒算錯的結帳員", y:"C", reason:"你擁有『數字敏感度』與『細心謹慎』的特質。"},
-            {t:"設計超級酷炫海報和招牌的美術組", y:"A", reason:"你具備『視覺設計』天賦，懂得用美感吸引注意力。"},
-            {t:"負責搬桌椅、搭帳棚的機動組", y:"R", reason:"你擁有『實作能力』與『體力優勢』，喜歡實際動手解決問題。"}
+        { q: "2. 班級要辦義賣活動，你最想？", options: [
+            {t:"📢 負責喊價推銷，吸引客人過來", y:"E", reason:"你具備『溝通說服』能力，不害怕面對陌生人。"},
+            {t:"💰 負責收錢找錢，確保帳目都正確", y:"C", reason:"你擁有『財務管理』潛力，做事細心且對數據敏感。"},
+            {t:"🎨 畫一張超級吸睛的海報貼門口", y:"A", reason:"你具備『品牌設計感』，懂得用視覺吸引注意力。"},
+            {t:"🛠️ 負責組裝攤位架子和商品擺設", y:"R", reason:"你擁有『實作天賦』，能快速將想法變成實體。"}
         ]},
-        { q: "3. 在野外露營時，如果遇到困難，你會？", options: [
-            {t:"觀察太陽和植物生長方向來認路", y:"I", reason:"你具備『環境偵查』與『運用知識解決問題』的能力。"},
-            {t:"動手搭一個穩固的臨時避難所", y:"R", reason:"你習慣透過『實作與工具』來克服野外生存危機。"},
-            {t:"冷靜下來，分配大家剩餘的水和食物", y:"E", reason:"你在壓力下能展現『危機管理』與『資源統籌』的領導力。"},
-            {t:"唱歌講笑話，安撫害怕的同學", y:"S", reason:"你擁有『情緒覺察』與『心理安撫』能力，是團隊的定心丸。"}
+        { q: "3. 遇到一個壞掉的玩具，你會？", options: [
+            {t:"🔧 拿起螺絲起子拆開來看哪裡壞了", y:"R", reason:"你對『機械結構』有直覺，是不折不扣的實踐者。"},
+            {t:"📖 上網查這個玩具的原理圖", y:"I", reason:"你習慣透過『研究資訊』來解決問題，思考勝過盲目動手。"},
+            {t:"😢 覺得它很可憐，想辦法安慰它", y:"S", reason:"你擁有豐富的『同理心』，對生命與情感非常敏銳。"},
+            {t:"⚡ 既然壞了，就把它改造成另一種玩具", y:"A", reason:"你擁有『轉化創意』，能從失敗中看見新的可能。"}
         ]},
-        { q: "4. 去圖書館時，你通常會選哪種書？", options: [
-            {t:"科學百科或偵探解謎小說", y:"I", reason:"你熱愛『邏輯推理』與『吸收硬知識』。"},
-            {t:"教你怎麼做手工藝或修理腳踏車的書", y:"R", reason:"你傾向『實用主義』，學了就想立刻動手試試看。"},
-            {t:"充滿豐富插畫的故事繪本或漫畫", y:"A", reason:"你對『圖像敘事』與『色彩美學』有高度的興趣。"},
-            {t:"偉人傳記或如何成為成功企業家的書", y:"E", reason:"你具備『企圖心』，渴望向成功人士學習影響力。"}
+        { q: "4. 放學後的課後社團，你最想參加：", options: [
+            {t:"🔬 小小科學家實驗班", y:"I", reason:"你熱愛『邏輯推理』與『實證觀察』。"},
+            {t:"🩰 流行舞蹈或戲劇社", y:"A", reason:"你渴望『自我表達』，身體裡住著藝術的靈魂。"},
+            {t:"🦁 領袖口才與溝通班", y:"E", reason:"你想要精進『影響力』，未來可能是很棒的領袖。"},
+            {t:"🧶 手工藝或烘焙社", y:"R", reason:"你熱愛『親手製造』，享受成品帶來的溫度。"}
         ]},
-        { q: "5. 如果你可以擁有一種超能力，你會選？", options: [
-            {t:"可以看穿別人心情的讀心術", y:"S", reason:"你具有極高的『同理心』，在乎人與人之間的情感流動。"},
-            {t:"讓畫出來的東西變成真實的魔法筆", y:"A", reason:"你擁有強大的『創造力』，希望能將腦中想像實體化。"},
-            {t:"讓所有弄亂的東西瞬間排整齊的魔法", y:"C", reason:"你追求『秩序與規律』，無法忍受混亂的狀態。"},
-            {t:"可以聽懂機器語言，並一秒修好它們", y:"R", reason:"你對『機械與系統』有天生的親切感與修復慾望。"}
+        { q: "5. 在圖書館看到新書，你通常選哪類？", options: [
+            {t:"🕵️ 名偵探解謎或科學實驗書", y:"I", reason:"你熱愛『破解難題』，大腦永遠在運轉。"},
+            {t:"🏥 醫療急救或心理小故事", y:"S", reason:"你關注『人的福祉』，想了解如何讓人生活得更好。"},
+            {t:"📈 創業家故事或投資理財", y:"E", reason:"你對『社會脈動』與『資源運用』充滿企圖心。"},
+            {t:"📚 精美圖鑑或各國建築畫冊", y:"A", reason:"你擁有『視覺美感感官』，重視畫面的平衡。"}
         ]},
-        { q: "6. 上課做分組報告時，你通常負責：", options: [
-            {t:"上台拿麥克風，對全班報告", y:"E", reason:"你享受『舞台魅力』，具備優秀的口語表達與自信。"},
-            {t:"上網查資料，確保內容正確無誤", y:"I", reason:"你擅長『資料搜集』與『資訊過濾』，重視事實與邏輯。"},
-            {t:"負責把簡報做得超級漂亮", y:"A", reason:"你具備『版面編排』與『資訊視覺化』的能力。"},
-            {t:"當記錄員，把大家講的話整理成筆記", y:"C", reason:"你擁有『資訊彙整』與『文書處理』的強項。"}
+        { q: "6. 假如你可以在學校規劃一個活動：", options: [
+            {t:"⚽ 舉辦全校體育運動比賽", y:"R", reason:"你偏好『身體操作』與『體力挑戰』。"},
+            {t:"🎤 策劃一場全校達人秀比賽", y:"E", reason:"你擅長『整合資源』，具備活動執行力。"},
+            {t:"🧩 舉辦靜態的數獨或解謎比賽", y:"I", reason:"你重視『腦力激盪』與『公平競賽』。"},
+            {t:"❤️ 舉辦二手義賣捐款給流浪狗", y:"S", reason:"你擁有強大的『社會責任感』。"}
         ]},
-        { q: "7. 放假時，你最想去哪種地方玩？", options: [
-            {t:"去天文館或恐龍博物館看展覽", y:"I", reason:"你對『自然科學』與『未知歷史』有強烈的探索慾望。"},
-            {t:"去孤兒院或養老院當小志工陪他們玩", y:"S", reason:"你具備『社會關懷』的精神，樂於付出時間幫助弱勢。"},
-            {t:"去遊樂園帶領大家規劃要玩什麼設施", y:"E", reason:"你擅長『活動規劃』與『帶動氣氛』。"},
-            {t:"去手作工坊體驗做木工或烤餅乾", y:"R", reason:"你享受『親手製造』的過程，喜歡看見具體成果。"}
+        { q: "7. 當朋友因為吵架哭泣時，你會？", options: [
+            {t:"🧸 靜靜遞上面紙並聽他訴苦", y:"S", reason:"你是最好的『傾聽者』，大家都很信任你。"},
+            {t:"🤔 分析兩個人吵架的邏輯誰對誰錯", y:"I", reason:"你重視『邏輯公平』，適合擔任調解或判官職位。"},
+            {t:"👊 拍拍他肩膀，帶他去操場跑兩圈發洩", y:"R", reason:"你相信『實際行動』是解決低落情緒的良藥。"},
+            {t:"🎬 講一個笑話或畫一張醜圖逗他笑", y:"A", reason:"你懂得利用『幽默感與創意』轉化環境氣氛。"}
         ]},
-        { q: "8. 看到一隻受傷的流浪狗，你的第一反應是？", options: [
-            {t:"覺得牠好可憐，想抱抱牠、安慰牠", y:"S", reason:"你的『情感豐富』，對弱小生命充滿愛與憐憫。"},
-            {t:"觀察牠的傷口，判斷是怎麼受傷的", y:"I", reason:"你遇到事件時能保持『理性分析』，先尋找問題根源。"},
-            {t:"用身邊的紙箱和衣服幫牠做一個急救小窩", y:"R", reason:"你擅長『就地取材』，用實際行動解決眼前的麻煩。"},
-            {t:"立刻打電話聯絡動保處或找大人來幫忙", y:"E", reason:"你懂得『尋求外部資源』與『危機通報』。"}
+        { q: "8. 玩桌遊大富翁時，你最開心的時刻：", options: [
+            {t:"📏 每一步都精確計算剩餘機率", y:"I", reason:"你具備『策略規劃』能力。"},
+            {t:"💸 談判交易土地，讓對手破產", y:"E", reason:"你具備『市場競爭』與『說服氣質』。"},
+            {t:"🏘️ 把房子蓋得整整齊齊很漂亮", y:"C", reason:"你重視『穩定管理』與『秩序美感』。"},
+            {t:"🥳 只是單純喜歡大家聚在一起笑", y:"S", reason:"你重視『人際連結』勝過輸贏。"}
         ]},
-        { q: "9. 你長大後希望住在哪種房子裡？", options: [
-            {t:"東西放得井然有序，有超大收納櫃的房子", y:"C", reason:"你注重『生活管理』與『空間規劃』的實用性。"},
-            {t:"牆壁漆成五顏六色，有很多藝術品的房子", y:"A", reason:"你對『空間美學』有自己的堅持，拒絕平庸。"},
-            {t:"裝滿最新聲控科技和自動化機器的智慧屋", y:"I", reason:"你擁抱『前沿科技』，對未來趨勢充滿憧憬。"},
-            {t:"有大客廳和烤肉架，可以常常請朋友來開派對", y:"E", reason:"你重視『社交網絡』與『人際關係的經營』。"}
+        { q: "9. 看到路上有奇怪的新機器，你會：", options: [
+            {t:"🔘 伸手按按看它的按鈕會發生什麼", y:"R", reason:"你不怕犯錯，習慣透過『親身體驗』來學習。"},
+            {t:"📱 拿出手機搜尋這台機器的說明", y:"I", reason:"你習慣『先調查再行動』，資訊是你安全感的來源。"},
+            {t:"📸 拍下它獨特的外觀當作靈感", y:"A", reason:"你總能從日常生活中捕捉『不尋常的創意』。"},
+            {t:"⚠️ 提醒路人這機器可能有危險", y:"E", reason:"你具備『風險覺察』與『主動領導』。"}
         ]},
-        { q: "10. 電腦突然當機了，你會：", options: [
-            {t:"拆開主機殼看看是不是哪裡線掉了", y:"R", reason:"你不畏懼『硬體結構』，有親自排解故障的勇氣。"},
-            {t:"上網 Google 錯誤代碼是什麼意思", y:"I", reason:"你具備『自學能力』與『問題追蹤(Debug)』技巧。"},
-            {t:"打電話問懂電腦的朋友請他幫忙", y:"S", reason:"你善於利用『人際互助』來解決自身不擅長的問題。"},
-            {t:"照著官方維修手冊一步一步重新開機", y:"C", reason:"你遵循『標準作業流程(SOP)』，做事規矩謹慎。"}
+        { q: "10. 如果要你製作一個班級週報，你想負責？", options: [
+            {t:"✍️ 寫採訪報導，訪問老師同學", y:"S", reason:"你具備『資訊採集』與『人際互動』能力。"},
+            {t:"💻 負責排版、校對，確保沒錯字", y:"C", reason:"你擁有『零失誤』的堅持。"},
+            {t:"🎨 畫插圖、配色，讓版面很炫", y:"A", reason:"你具備『視覺美感』。"},
+            {t:"📢 決定本週的主題要討論什麼", y:"E", reason:"你具備『編輯決策權』與『方向掌控力』。"}
         ]},
-        { q: "11. 玩桌遊(例如大富翁)時，你最喜歡的環節是：", options: [
-            {t:"數鈔票、找錢，確保銀行帳目是對的", y:"C", reason:"你在遊戲中展現了『會計特質』與對規則的維護。"},
-            {t:"想辦法交易、談判，讓自己賺最多錢", y:"E", reason:"你具備『商業頭腦』與『談判博弈』的直覺。"},
-            {t:"觀察別人的策略，計算自己走哪一步最有利", y:"I", reason:"你擅長『策略推演』與『數據預測』。"},
-            {t:"不在乎輸贏，只要大家笑得很開心就好", y:"S", reason:"你具備『氣氛營造者』特質，重視過程勝於結果。"}
+        { q: "11. 放假去野外露營迷路了，第一步：", options: [
+            {t:"🌲 觀察樹木年輪和苔癬找方向", y:"I", reason:"你擁有『跨領域知識整合』能力。"},
+            {t:"🚩 在路邊疊石頭做標記避免走重複路", y:"R", reason:"你擅長利用『實體工具』解決當下困境。"},
+            {t:"📣 大聲發號施令，讓大家不要亂跑", y:"E", reason:"你在壓力下展現『指揮官』天賦。"},
+            {t:"🤱 緊緊牽住年紀小的同學保護他", y:"S", reason:"你具備『守護者』特質。"}
         ]},
-        { q: "12. 數學課對你來說，最有趣的地方是：", options: [
-            {t:"算出唯一正確答案的那瞬間，很爽快！", y:"C", reason:"你喜歡『確定性』與『絕對正確』帶來的安定感。"},
-            {t:"了解公式背後的原理是怎麼推導出來的", y:"I", reason:"你追求『知其然，更要知其所以然』的深度學習。"},
-            {t:"把幾何圖形畫得超級標準漂亮", y:"A", reason:"你能在理性的科目中發掘『幾何美學』。"},
-            {t:"教隔壁不會算的同學，看他終於懂了的表情", y:"S", reason:"你從『知識傳遞』與『助人』中獲得最大的成就感。"}
+        { q: "12. 你心目中最酷的工作環境是：", options: [
+            {t:"🌲 到處飛行的戶外勘查現場", y:"R", reason:"你討厭被關在辦公室，喜歡『動態作業』。"},
+            {t:"🔬 裝滿顯微鏡與螢幕的高精密實驗室", y:"I", reason:"你享受『深度鑽研』。"},
+            {t:"🎨 堆滿畫布、樂器或攝影機的工作室", y:"A", reason:"你渴望『自由、不受限』的工作彈性。"},
+            {t:"🏬 在高樓大廈帶領大公司決策", y:"E", reason:"你渴望『社會影響力』。"}
         ]},
-        { q: "13. 同學快生日了，你會準備什麼禮物？", options: [
-            {t:"親手用木頭雕刻或縫製一個小吊飾", y:"R", reason:"你認為『手工藝的溫度』與實作價值最珍貴。"},
-            {t:"他正需要用到的實用筆記本或文具", y:"C", reason:"你具備『務實考量』，送禮講求功能性與實用率。"},
-            {t:"一張寫滿感人心裡話的手作大卡片", y:"S", reason:"你重視『情感交流』，文字是你傳遞溫暖的武器。"},
-            {t:"買一個目前最流行、帶去學校很有面子的玩具", y:"E", reason:"你對『流行文化』與『同儕心理』有敏銳的觀察。"}
+        { q: "13. 數學課對你的吸引力在於：", options: [
+            {t:"✅ 答案對就是對，錯就是錯，很乾脆", y:"C", reason:"你喜好『清晰的規範』。"},
+            {t:"🧠 用邏輯證明一個難題的過程", y:"I", reason:"你享受『思考的重量』。"},
+            {t:"🤝 幫不會算的同學教會他", y:"S", reason:"你具備『教育推廣』天賦。"},
+            {t:"📐 畫出完美的圓形與對稱圖形", y:"A", reason:"你對『比例與平衡』有直覺。"}
         ]},
-        { q: "14. 如果要你選一門課後才藝班，你會選：", options: [
-            {t:"機器人組裝與無人機飛行", y:"R", reason:"你對『機電整合』與『物理操作』有高度熱忱。"},
-            {t:"程式語言與App開發設計", y:"I", reason:"你具備『系統性思維』，渴望掌握數位時代的語言。"},
-            {t:"戲劇表演或流行街舞", y:"A", reason:"你渴望『自我表達』與『釋放身體能量』。"},
-            {t:"小小領袖口才與演講訓練", y:"E", reason:"你想要精進『公眾表達』，渴望未來能發揮影響力。"}
+        { q: "14. 如果要你選一樣禮物送給未來的自己：", options: [
+            {t:"🛠️ 一套全能萬用工具組", y:"R", reason:"你相信『雙手萬能』。"},
+            {t:"📚 一台存滿世界所有電子書的閱讀器", y:"I", reason:"你深信『知識就是力量』。"},
+            {t:"🎟️ 一張環遊世界各國的機票", y:"E", reason:"你渴望『拓展視野』。"},
+            {t:"🎤 讓大家都能聽見你說話的神奇麥克風", y:"A", reason:"你想要『向世界發聲』。"}
         ]},
-        { q: "15. 別人通常都怎麼形容你？", options: [
-            {t:"安靜細心，東西交給你都很放心", y:"C", reason:"你給人『可靠、穩定、有責任感』的極佳印象。"},
-            {t:"鬼點子很多，常常想出奇怪好玩的事", y:"A", reason:"你是群體中的『創意引擎』，永遠不按牌理出牌。"},
-            {t:"很溫柔，是個很好的傾聽者", y:"S", reason:"你是大家心中的『心靈避風港』，讓人感到放鬆。"},
-            {t:"行動派，說做就做，不怕弄髒手", y:"R", reason:"你展現了『強大的執行力』與不怕困難的韌性。"}
+        { q: "15. 別人眼中最可靠的你是：", options: [
+            {t:"🦾 做事很拚，沒做完絕不休息", y:"R", reason:"你擁有強大的『意志力與行動力』。"},
+            {t:"🧠 只要問你，你總是知道答案", y:"I", reason:"你是大家心中的『行動百科全書』。"},
+            {t:"😊 很親切，什麼事都能跟你商量", y:"S", reason:"你是完美的『人際橋樑』。"},
+            {t:"📏 東西擺得整齊，約會絕不遲到", y:"C", reason:"你具備『極致自律』。"}
         ]}
     ];
 
     const careerData = {
         "R": {
             type: "實作英雄 (Realistic)",
-            jobs: ["機器人工程師", "五星級主廚", "動物復健師", "飛機維修員"],
-            traits: "動手能力極強、空間感好、務實不空談、喜歡操作工具解決問題。",
-            skills: "工具操作、精密組裝、體能耐力、物聯網硬體應用。",
-            subjects: "數學、自然科學、生活科技。",
-            pros: "成品看得見摸得著，成就感最直接；擁有一技之長，不容易被AI完全取代。",
-            cons: "工作環境可能較嘈雜或在戶外；部分工作體力消耗大，需注意職業傷害防護。",
-            keywords: "精密工程, 綠能建築, 無人機技術, 技職達人"
+            jobs: ["機器人工程師", "外科醫師", "無人機操作員", "五星級主廚"],
+            famous: "特斯拉創辦人 Elon Musk、頂級主廚 Gordon Ramsay",
+            pros: ["專業技術不易被 AI 取代", "成就感非常直接（做完就能看到成果）", "工作內容不枯燥，通常在動態環境"],
+            cons: ["體力消耗較大，需要強健的體魄", "工作環境可能較嘈雜或有受傷風險", "通常需要長時間站立或精密操作"],
+            mission: "本週試著修理家中一樣壞掉的小東西，或親自幫家人組裝一件家具！",
+            keywords: "精密工程, 物聯網硬體, 自動化控制, 職人精神"
         },
         "I": {
             type: "智慧學者 (Investigative)",
-            jobs: ["數據科學家", "AI演算法工程師", "藥物研發員", "天文學家"],
-            traits: "邏輯推理強、愛問為什麼、獨立思考、觀察細膩、追求真理。",
-            skills: "程式設計(Python/C++)、統計分析、科學實驗設計。",
-            subjects: "物理、化學、高等數學、英文（閱讀國際論文必備）。",
-            pros: "工作時間通常較穩定；解開人類未解之謎時，會獲得無與倫比的成就感。",
-            cons: "需要長時間盯著電腦或顯微鏡，眼力與耐力壓力大；研究成果有時要好幾年才看得見。",
-            keywords: "機器學習(ML), 基因編輯, 量子電腦, 大數據分析"
+            jobs: ["數據分析師", "藥物研發員", "天文學家", "刑事鑑識專家"],
+            famous: "物理學家 愛因斯坦、居禮夫人",
+            pros: ["薪資潛力高，屬於知識密集產業", "工作時間相對彈性穩定", "每天都在接觸世界最前端的知識"],
+            cons: ["需要長時間專注，眼力負擔較大", "研究結果可能要數年才會顯現", "工作內容有時較為孤獨寂寞"],
+            mission: "去圖書館借閱一本關於自然科學或天文的書，並跟家人分享一個最酷的冷知識！",
+            keywords: "大數據, 基因工程, 人工智慧, 量子力學"
         },
         "A": {
             type: "創意魔法師 (Artistic)",
-            jobs: ["遊戲開發設計師", "UI/UX介面設計師", "影視編劇", "室內設計師"],
-            traits: "想像力豐富、直覺敏銳、不喜歡死板規矩、情感表達細膩。",
-            skills: "視覺美學、故事敘事能力、數位創作工具(如PS, Blender, Figma)。",
-            subjects: "美術、音樂、語文、歷史（找尋創作靈感）。",
-            pros: "工作內容多元不枯燥；可以將自己的夢想變成現實，用美感影響世界。",
-            cons: "自由接案初期收入可能不穩定；經常需要面對靈感枯竭的壓力，或應付客戶不斷的改稿要求。",
-            keywords: "使用者體驗(UX), 元宇宙3D設計, 動畫特效, 品牌設計"
+            jobs: ["遊戲美術設計", "影視編劇", "室內設計師", "流行樂手"],
+            famous: "動畫大師 宮崎駿、華特·迪士尼",
+            pros: ["生活充滿趣味，工作就是玩樂", "可以發揮個人風格，影響人們的情緒", "不需要待在傳統辦公室"],
+            cons: ["接案初期收入可能不穩定", "容易遇到靈感枯竭的壓力", "經常需要熬夜趕稿或應付修改需求"],
+            mission: "利用這週末，畫一張關於「30年後的我」的畫作，或錄製一段自己的音樂分享給朋友！",
+            keywords: "視覺傳達, 使用者體驗UX, 數位創作, 敘事美學"
         },
         "S": {
             type: "暖心領航員 (Social)",
-            jobs: ["心理諮商師", "特教老師", "非營利組織(NGO)負責人", "物理治療師"],
-            traits: "同理心極高、擅長溝通聆聽、喜歡幫助別人成長、耐心十足。",
-            skills: "情緒覺察與引導、跨部門溝通、活動企劃與執行能力。",
-            subjects: "社會科、健康與護理、語文表達。",
-            pros: "能深刻感受到「被需要」，助人帶來的心靈富足感極高；人際溝通技能終身受用。",
-            cons: "容易接收到他人的負面情緒導致「同情心疲勞」；需要花費大量心力處理複雜的人際糾紛。",
-            keywords: "社會企業創新, 心理衛生教育, 永續發展(ESG), 特殊教育"
+            jobs: ["心理諮商師", "特教老師", "物理治療師", "社會企業創業者"],
+            famous: "泰瑞莎修女、馬拉拉",
+            pros: ["被需要的感覺帶來極大心靈幸福", "工作回饋感極強", "人際技能讓你在生活中處處受歡迎"],
+            cons: ["容易吸收他人的負面情緒導致疲累", "處理複雜的人際糾紛非常耗心神", "需要極大的耐心與溝通體力"],
+            mission: "本週主動觀察一位心情不好的同學，並給予一個簡單的關心或小零食，觀察他的反應！",
+            keywords: "社會創新, 心理健康, 永續經營ESG, 多元包容"
         },
         "E": {
             type: "果敢領袖 (Enterprising)",
             jobs: ["科技創業家", "行銷總監", "產品經理(PM)", "外交官"],
-            traits: "充滿冒險精神、活力充沛、說服力強、喜歡帶領團隊達成目標。",
-            skills: "公眾演講、商業談判、財務預算控管、專案管理。",
-            subjects: "公民與社會、經濟學、外語能力。",
-            pros: "職涯天花板高，收入成長潛力最大；擁有資源分配權，能帶動整個產業的改變。",
-            cons: "工作壓力極大，通常沒有固定的下班時間；必須承擔決策失敗帶來的重大責任與壓力。",
-            keywords: "數位轉型, 商業模式創新, 風險創業投資(VC), 敏捷開發管理"
+            famous: "賈伯斯 Steve Jobs、歐普拉",
+            pros: ["擁有高度的決策權與主導感", "收入增長潛力最高", "生活充滿挑戰與變動，極富冒險感"],
+            cons: ["必須承擔失敗與賠錢的風險", "工作與生活很難切分開來", "需要經常面對衝突與高壓談判"],
+            mission: "下週跟老師爭取擔任班級或小組的負責人，嘗試規劃一個大家都能參與的小活動！",
+            keywords: "商業模式, 風險管理, 演講溝通, 敏捷管理"
         },
         "C": {
             type: "秩序守護者 (Conventional)",
-            jobs: ["資訊安全分析師", "精算師", "物流供應鏈經理", "法律顧問"],
-            traits: "極度細心、組織能力強、可靠值得信任、極度重視效率與規則。",
-            skills: "文書資料處理、資料庫架構、專案進度追蹤、風險稽核。",
-            subjects: "數學、會計、資訊科學、法律常識。",
-            pros: "工作環境穩定且受人敬重；你是企業運作的心臟，任何大型計畫都不能沒有你。",
-            cons: "工作內容有時較固定且重複，可能感到枯燥；對錯誤的容忍度極低，工作壓力來源於「不能出錯」。",
-            keywords: "區塊鏈技術, 資訊安全(資安), 雲端資料庫管理, 自動化流程(RPA)"
+            jobs: ["資安分析師", "精算師", "物流專家", "律師"],
+            famous: "股神 巴菲特、蘋果執行長 Tim Cook",
+            pros: ["工作穩定性最高，受到企業高度信任", "專業度極強，隨著資歷薪資穩定成長", "生活作息非常有規律"],
+            cons: ["工作內容重複性較高，可能感到單調", "對精確度要求極高，不能出錯的壓力大", "通常需要坐在辦公室處理大量數據"],
+            mission: "將自己的書桌或房間進行一次徹底的分類整理，並畫出一張屬於自己的作息時間表！",
+            keywords: "區塊鏈, 供應鏈管理, 資訊安全, 資料庫"
         }
     };
 
     let currentIdx = 0;
     let userSelections = new Array(questions.length).fill(null);
-    let radarChartInstance = null; // 儲存圖表實例
+    let radarChartInstance = null;
 
     function startQuiz() {
         document.getElementById('start-screen').classList.add('hidden');
@@ -301,74 +310,61 @@
         }
     }
 
-    function prevQuestion() {
-        if (currentIdx > 0) { currentIdx--; renderNav(); renderQuestion(); }
-    }
-
-    function jumpToQuestion(idx) {
-        currentIdx = idx;
-        renderNav();
-        renderQuestion();
-    }
+    function prevQuestion() { if (currentIdx > 0) { currentIdx--; renderNav(); renderQuestion(); } }
+    function jumpToQuestion(idx) { currentIdx = idx; renderNav(); renderQuestion(); }
 
     function showFinalResult() {
         document.getElementById('quiz-screen').classList.add('hidden');
         document.getElementById('result-screen').style.display = 'block';
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString();
 
         let counts = { R:0, I:0, A:0, S:0, E:0, C:0 };
         let reasons = [];
-
         userSelections.forEach((selIdx, qIdx) => {
             const opt = questions[qIdx].options[selIdx];
             counts[opt.y]++;
             reasons.push(opt.reason);
         });
 
-        // 繪製雷達圖
         drawRadarChart(counts);
-
-        // 找到最高分的類別
         let topType = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
         const data = careerData[topType];
+        document.getElementById('job-type-name').innerText = data.type;
 
-        // 隨機挑選 3 個特質分析顯示，避免文字過長
-        const shuffledReasons = reasons.sort(() => 0.5 - Math.random());
-        const selectedReasons = shuffledReasons.slice(0, 3);
+        // 行為解析（隨機3條）
+        const selectedReasons = reasons.sort(() => 0.5 - Math.random()).slice(0, 3);
+        document.getElementById('behavior-analysis').innerHTML = `💡 <b>從測驗看你的天賦：</b><br>● ${selectedReasons.join('<br>● ')}`;
 
-        document.getElementById('behavior-analysis').innerHTML = `從你的作答中，我們發現了這些珍貴的特質：<br><br>🎯 ${selectedReasons.join('<br><br>🎯 ')}`;
-        
         const recArea = document.getElementById('career-recommendations');
         recArea.innerHTML = `
             <div class="career-section">
-                <h2>👑 你的主導天賦：${data.type}</h2>
-                <div class="info-box" style="margin-bottom:15px;"><strong>💡 核心特質：</strong>${data.traits}</div>
-                
-                <div class="grid-info">
+                <div class="pros-cons-grid">
                     <div class="info-box">
-                        <span class="badge">星級推薦職業</span>
-                        <ul style="padding-left:20px; margin-bottom:0;">${data.jobs.map(j => `<li>${j}</li>`).join('')}</ul>
+                        <span class="badge">🌟 職場優點分析</span>
+                        ${data.pros.map(p => `<div class="list-item"><span class="check-icon">✓</span> ${p}</div>`).join('')}
                     </div>
                     <div class="info-box">
-                        <span class="badge">裝備技能與學科</span>
-                        <p style="margin:5px 0;"><strong>📚 重點學科：</strong>${data.subjects}</p>
-                        <p style="margin:5px 0;"><strong>🛠️ 必備技能：</strong>${data.skills}</p>
+                        <span class="badge" style="background:#e67e22; color:white">⚠️ 現實挑戰與缺點</span>
+                        ${data.cons.map(c => `<div class="list-item"><span class="warn-icon">⚠</span> ${c}</div>`).join('')}
                     </div>
                 </div>
 
-                <div class="grid-info">
-                    <div class="info-box" style="color:#27ae60">
-                        <span class="badge" style="background:#2ecc71; color:white">🌟 職場優點分析</span><br>${data.pros}
-                    </div>
-                    <div class="info-box" style="color:#e67e22">
-                        <span class="badge" style="background:#e67e22; color:white">⚠️ 現實挑戰與缺點</span><br>${data.cons}
-                    </div>
+                <div class="info-box">
+                    <span class="badge" style="background:#3498db; color:white">🏆 英雄榜：代表人物</span>
+                    <p><b>你可以搜尋：</b> ${data.famous}</p>
                 </div>
 
-                <div class="search-keywords">
-                    <strong>🔍 加深加廣！課外探索關鍵字</strong><br>
-                    <span style="font-size:0.9rem; color:#666;">去圖書館或 YouTube 搜尋這些詞，了解頂尖高手都在做什麼：</span><br>
+                <div class="mission-box">
+                    <h3 style="margin-top:0;">🎯 本週英雄任務</h3>
+                    <p style="font-size:1.1rem; color:#d35400;">${data.mission}</p>
+                </div>
+
+                <div class="info-box">
+                    <span class="badge" style="background:#2ecc71; color:white">🔍 推薦搜尋關鍵字 (點擊開啟搜尋)</span><br>
                     <div style="margin-top:10px;">
-                        ${data.keywords.split(',').map(k => `<span style="display:inline-block; background:white; padding:5px 10px; border-radius:20px; border:1px solid #ccc; margin:3px; font-weight:bold; color:var(--primary)">${k.trim()}</span>`).join('')}
+                        ${data.keywords.split(',').map(k => `
+                            <a href="https://www.google.com/search?q=${k.trim()}" target="_blank" class="kw-tag">${k.trim()}</a>
+                        `).join('')}
                     </div>
                 </div>
             </div>
@@ -377,48 +373,25 @@
 
     function drawRadarChart(counts) {
         const ctx = document.getElementById('radarChart').getContext('2d');
-        
-        // 如果已經有圖表，先銷毀它，避免重新測驗時圖表重疊
-        if (radarChartInstance) {
-            radarChartInstance.destroy();
-        }
-
+        if (radarChartInstance) radarChartInstance.destroy();
         radarChartInstance = new Chart(ctx, {
             type: 'radar',
             data: {
-                labels: ['實作力 (R)', '研究分析 (I)', '藝術創意 (A)', '社會關懷 (S)', '企業領導 (E)', '常規執行 (C)'],
+                labels: ['實作力 (R)', '探究力 (I)', '藝術力 (A)', '社交力 (S)', '領導力 (E)', '常規力 (C)'],
                 datasets: [{
-                    label: '超能力雷達數值',
+                    label: '能力分布',
                     data: [counts.R, counts.I, counts.A, counts.S, counts.E, counts.C],
-                    backgroundColor: 'rgba(78, 205, 196, 0.4)', // 淺綠色填滿
-                    borderColor: '#4ECDC4', // 邊界線顏色
-                    pointBackgroundColor: '#FF6B6B', // 點的顏色
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: '#FF6B6B',
+                    backgroundColor: 'rgba(255, 107, 107, 0.4)',
+                    borderColor: '#FF6B6B',
+                    pointBackgroundColor: '#FF6B6B',
                     borderWidth: 2
                 }]
             },
             options: {
-                responsive: true,
                 scales: {
-                    r: {
-                        angleLines: { color: 'rgba(0, 0, 0, 0.1)' },
-                        grid: { color: 'rgba(0, 0, 0, 0.1)' },
-                        pointLabels: {
-                            font: { size: 14, family: "'Noto Sans TC', sans-serif", weight: 'bold' },
-                            color: '#2D3436'
-                        },
-                        ticks: {
-                            beginAtZero: true,
-                            stepSize: 1,
-                            display: false // 隱藏圈圈上的數字，讓畫面更乾淨
-                        }
-                    }
+                    r: { beginAtZero: true, stepSize: 1, ticks: { display: false }, pointLabels: { font: { size: 14, weight: 'bold' } } }
                 },
-                plugins: {
-                    legend: { display: false } // 隱藏圖例
-                }
+                plugins: { legend: { display: false } }
             }
         });
     }
