@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>未來英雄學院 - 15題深度探索版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #4ECDC4;
+            --accent: #FFE66D;
+            --bg: #F7FFF7;
+            --text: #2F2F2F;
+        }
+
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #game-container {
+            background: white;
+            width: 95%;
+            max-width: 700px;
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .progress-container { margin-bottom: 30px; }
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #eee;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        #progress-inner {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--secondary), var(--primary));
+            transition: width 0.4s ease;
+        }
+        #progress-text { font-size: 0.9rem; color: #888; margin-top: 5px; }
+
+        h1 { color: var(--primary); font-size: 2rem; }
+        h2 { font-size: 1.4rem; margin-bottom: 1.5rem; line-height: 1.4; }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 18px 25px;
+            border-radius: 15px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #d45050;
+        }
+
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #d45050; }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #d45050; }
+
+        .option-btn {
+            background: #fff;
+            color: var(--text);
+            border: 2px solid #e0e0e0;
+            box-shadow: 0 4px 0 #eee;
+            text-align: left;
+        }
+        .option-btn:hover { border-color: var(--secondary); background: #f0fdfc; box-shadow: 0 4px 0 var(--secondary); }
+
+        /* 結果區塊 */
+        .result-card { display: none; text-align: left; animation: slideUp 0.6s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .analysis-section {
+            background: #fdfae6;
+            border-left: 8px solid var(--accent);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        .tag {
+            display: inline-block;
+            background: var(--secondary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+        }
+
+        .hidden { display: none; }
+        hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="start-screen">
+        <div style="font-size: 4rem;">🚀</div>
+        <h1>未來英雄學院</h1>
+        <p>這是一場橫跨 15 個關卡的自我發現之旅！<br>選出最像你的答案，我們將為你揭開未來的神祕職業。</p>
+        <button class="btn" onclick="startQuiz()">點擊開始冒險</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="progress-container">
+            <div class="progress-bar"><div id="progress-inner"></div></div>
+            <div id="progress-text">進度：0 / 15</div>
+        </div>
+        <h2 id="question-text">載入中...</h2>
+        <div id="options-container" class="options-grid"></div>
+    </div>
+
+    <div id="result-screen" class="result-card">
+        <div style="text-align: center;">
+            <div class="tag">探索報告已生成</div>
+            <h1 id="job-title" style="margin: 10px 0;">職業名稱</h1>
+        </div>
+        
+        <div class="analysis-section">
+            <h3 style="margin-top: 0;">💡 為什麼推薦這個職業？ (原因分析)</h3>
+            <p id="reasoning-text"></p>
+        </div>
+
+        <div style="padding: 0 10px;">
+            <p style="color: #2ecc71;"><strong>🌟 職業閃光點：</strong> <span id="job-pros"></span></p>
+            <p style="color: #e67e22;"><strong>🚀 成長小挑戰：</strong> <span id="job-cons"></span></p>
+        </div>
+
+        <hr>
+        <button class="btn" onclick="location.reload()" style="width: 100%;">重新探索一次</button>
+    </div>
+</div>
+
+<script>
+    const questions = [
+        { q: "1. 拿到一組新的樂高積木，你會怎麼做？", options: [{t:"照說明書拼得一模一樣",y:"C"}, {t:"隨便亂拼，做出自己的怪獸",y:"A"}, {t:"研究怎麼加裝馬達讓它動起來",y:"R"}, {t:"找朋友一起分工合作完成",y:"S"}] },
+        { q: "2. 在科博館看到一個神祕機器，你第一反應是？", options: [{t:"跑過去按按鈕看看會發生什麼",y:"R"}, {t:"認真讀旁邊的說明牌文字",y:"I"}, {t:"在旁邊畫出機器的樣子",y:"A"}, {t:"帶領同學介紹這個機器",y:"E"}] },
+        { q: "3. 如果你可以擁有一種魔法道具，你會選？", options: [{t:"可以修理一切的萬能板手",y:"R"}, {t:"能照出事物真相的放大鏡",y:"I"}, {t:"能讓畫作變真實的畫筆",y:"A"}, {t:"能聽見別人心聲的耳機",y:"S"}] },
+        { q: "4. 老師請你幫忙整理圖書室，你會？", options: [{t:"依照書的大小和顏色排整齊",y:"C"}, {t:"幫忙推薦好看的書給同學",y:"S"}, {t:"設計一張超酷的海報貼門口",y:"A"}, {t:"負責統計總共有多少本書",y:"C"}] },
+        { q: "5. 你最喜歡的電視節目類型是？", options: [{t:"實境全能改造王",y:"R"}, {t:"名偵探柯南或科學解謎",y:"I"}, {t:"選秀節目或藝術表演",y:"A"}, {t:"創業家實錄或演講",y:"E"}] },
+        { q: "6. 在分組討論時，你通常擔任？", options: [{t:"負責把想法寫下來的人",y:"C"}, {t:"負責上台發言的領袖",y:"E"}, {t:"負責想出怪點子的人",y:"A"}, {t:"負責安慰大家不要吵架的人",y:"S"}] },
+        { q: "7. 如果在野外迷路了，你會？", options: [{t:"利用樹影和指南針找路",y:"I"}, {t:"動手搭一個臨時避難所",y:"R"}, {t:"冷靜分配大家的工作",y:"E"}, {t:"大聲唱歌讓大家不害怕",y:"A"}] },
+        { q: "8. 你長大後希望住在哪種房子？", options: [{t:"充滿高科技自動化設備的家",y:"I"}, {t:"外觀顏色繽紛的藝術屋",y:"A"}, {t:"有很多房間招待朋友的派對屋",y:"E"}, {t:"佈置得井井有條的溫馨小屋",y:"C"}] },
+        { q: "9. 看到流浪小狗，你的感覺是？", options: [{t:"想要幫牠建立一個小木屋",y:"R"}, {t:"觀察牠的身體看牠有沒有生病",y:"I"}, {t:"覺得牠很可憐，想抱抱牠安慰牠",y:"S"}, {t:"想辦法聯絡大人來解決問題",y:"E"}] },
+        { q: "10. 如果要經營一家店，你想賣？", options: [{t:"親手做的木工家具",y:"R"}, {t:"科學實驗教材包",y:"I"}, {t:"教大家唱歌跳舞的課程",y:"A"}, {t:"實用又整齊的文具組",y:"C"}] },
+        { q: "11. 放假時，你最想去哪裡玩？", options: [{t:"露營區動手搭帳篷火烤",y:"R"}, {t:"去科博館或天文台",y:"I"}, {t:"去遊樂園帶大家玩遊戲",y:"E"}, {t:"去當小志工照顧長輩",y:"S"}] },
+        { q: "12. 數學課對你來說，最有趣的是？", options: [{t:"算出正確答案的快感",y:"C"}, {t:"了解數字背後的規律",y:"I"}, {t:"用圖畫來代表數字",y:"A"}, {t:"教旁邊不會的同學",y:"S"}] },
+        { q: "13. 如果世界末日只能帶一樣東西去外星？", options: [{t:"工具箱",y:"R"}, {t:"百科全書",y:"I"}, {t:"相機/畫冊",y:"A"}, {t:"急救箱",y:"S"}] },
+        { q: "14. 同學慶生，你通常會準備什麼禮物？", options: [{t:"親手刻的小印章或手工品",y:"R"}, {t:"他最需要的實用筆記本",y:"C"}, {t:"一張親手寫的感人卡片",y:"S"}, {t:"他會覺得很有面子的酷玩具",y:"E"}] },
+        { q: "15. 你覺得哪種形容最像你？", options: [{t:"腳踏實地，動手做就對了",y:"R"}, {t:"愛動腦筋，想通了才動手",y:"I"}, {t:"活力充沛，喜歡帶領大家",y:"E"}, {t:"細心溫暖，喜歡安靜觀察",y:"C"}] }
+    ];
+
+    const results = {
+        "R": { title: "萬能工藝英雄", pros: "你的實動能力超強，能將想法實體化！", cons: "要注意有時太依賴體力，要多聽聽別人的想法喔。", reason: "你在測驗中多次選擇「親自動手」與「解決實際問題」。這代表你擁有敏銳的觸覺和協調性，適合需要精準操作與體力的工作。" },
+        "I": { title: "智慧探索學者", pros: "你的大腦是你最強的武器，觀察入微！", cons: "有時候想得太多反而不敢動手，勇氣也很重要。", reason: "你偏好「觀察規律」、「閱讀」與「破解難題」。這顯示你具有強大的邏輯思考能力，喜歡在未知的世界尋找答案。" },
+        "A": { title: "創意魔法師", pros: "你有無限的想像力，世界因你而美麗！", cons: "情緒起伏可能比較大，要學習如何穩定發揮。", reason: "你傾向於「創作」、「自由發揮」與「獨特的自我表達」。這說明你的靈魂裡住著一個藝術家，不喜歡被死板的規則綁住。" },
+        "S": { title: "暖心守護天使", pros: "你是團隊的靈魂人物，大家都很信任你！", cons: "有時候太在乎別人，會忘了照顧自己的心情。", reason: "你多次選擇「幫助他人」、「交流」與「情感支持」。你具備極高的同理心，適合與人溝通、分享知識的工作。" },
+        "E": { title: "果敢冒險領袖", pros: "你天生有領袖魅力，能指引團隊方向！", cons: "要小心有時太強勢，多給隊友一點發揮空間。", reason: "你在測驗中表現出「領導」、「說服」與「追求成就」的渴望。這代表你擅長計畫並帶領大家朝目標邁進。" },
+        "C": { title: "細心秩序守護者", pros: "你極度可靠，事情交給你絕對沒問題！", cons: "太過追求完美會讓你壓力很大，學會放輕鬆。", reason: "你偏好「規律」、「整理」與「數據統計」。這顯示你具備極佳的耐性與細膩度，是團隊中不可或缺的定海神針。" }
+    };
+
+    let currentQ = 0;
+    let scores = { R:0, I:0, A:0, S:0, E:0, C:0 };
+
+    function startQuiz() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        if (currentQ >= questions.length) {
+            showFinalResult();
+            return;
+        }
+
+        const qData = questions[currentQ];
+        document.getElementById('question-text').innerText = qData.q;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+
+        qData.options.forEach(opt => {
+            const b = document.createElement('button');
+            b.className = 'btn option-btn';
+            b.innerText = opt.t;
+            b.onclick = () => { scores[opt.y]++; currentQ++; renderQuestion(); };
+            container.appendChild(b);
+        });
+
+        // 更新進度
+        const p = ((currentQ) / questions.length) * 100;
+        document.getElementById('progress-inner').style.width = p + '%';
+        document.getElementById('progress-text').innerText = `進度：${currentQ} / ${questions.length}`;
+    }
+
+    function showFinalResult() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('result-screen').style.display = 'block';
+
+        let topType = 'R';
+        let max = -1;
+        for (let type in scores) {
+            if (scores[type] > max) { max = scores[type]; topType = type; }
+        }
+
+        const res = results[topType];
+        document.getElementById('job-title').innerText = res.title;
+        document.getElementById('reasoning-text').innerText = res.reason;
+        document.getElementById('job-pros').innerText = res.pros;
+        document.getElementById('job-cons').innerText = res.cons;
+    }
+</script>
+
+</body>
+</html>
