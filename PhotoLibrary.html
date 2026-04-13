@@ -371,6 +371,17 @@
         <div class="finalist-hero-icon">🏆</div>
         <div><h2>最終推薦名單</h2><p>每班電腦老師推薦的 2 位代表，共 3 張主題作品</p></div>
       </div>
+      <!-- 匯出工具列 -->
+      <div id="export-toolbar" style="display:none; margin-bottom:1.5rem;">
+        <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center;margin-bottom:1rem;">
+          <button onclick="exportExcel()" style="background:var(--teal);color:white;border:none;padding:0.7rem 1.6rem;border-radius:12px;font-family:'Noto Serif TC',serif;font-size:0.95rem;cursor:pointer;display:flex;align-items:center;gap:0.5rem;">📥 下載 Excel</button>
+          <button onclick="copyList()" id="copy-btn" style="background:var(--gold);color:var(--dark);border:none;padding:0.7rem 1.6rem;border-radius:12px;font-family:'Noto Serif TC',serif;font-size:0.95rem;cursor:pointer;font-weight:700;">📋 複製名單</button>
+        </div>
+        <div style="background:var(--white);border-radius:16px;padding:1.2rem 1.5rem;box-shadow:var(--shadow);">
+          <div style="font-size:0.82rem;color:var(--mid);margin-bottom:0.6rem;">文字名單（可直接複製）</div>
+          <pre id="export-text" style="font-family:'Noto Serif TC',serif;font-size:0.95rem;line-height:2;color:var(--dark);white-space:pre-wrap;user-select:all;"></pre>
+        </div>
+      </div>
       <div id="admin-finalist-content"><div class="loading"><div class="spinner"></div>載入中...</div></div>
     </div>
   </div>
@@ -665,17 +676,55 @@ function renderFinalistGrid(students,cls,recommended,container){
 }
 
 // ADMIN FINALIST
+let allFinalists = []; // [{cls, num, name, sid}]
 async function loadAdminFinalist(){
   const container=document.getElementById('admin-finalist-content');
   container.innerHTML='<div class="loading"><div class="spinner"></div>載入中...</div>';
+  document.getElementById('export-toolbar').style.display='none';
   try{
     const results=await Promise.all(CLASSES.map(async cls=>{
       const [ds,rs]=await Promise.all([db.collection('classes').doc(cls).get(),db.collection('recommendations').doc(cls).get()]);
       return{cls,students:ds.exists?[...ds.data().students||[]].sort((a,b)=>a.num-b.num):[],recommended:rs.exists?(rs.data().list||[]):[]};
     }));
+    // build finalists list
+    allFinalists=[];
+    results.forEach(({cls,students,recommended})=>{
+      students.filter(s=>recommended.includes(s.num)).forEach(s=>{
+        allFinalists.push({cls,num:s.num,name:s.name,sid:cls+String(s.num).padStart(2,'0')});
+      });
+    });
+    // render text list
+    if(allFinalists.length){
+      document.getElementById('export-text').textContent=allFinalists.map(f=>`${f.sid} ${f.name}`).join('\n');
+      document.getElementById('export-toolbar').style.display='block';
+    }
+    // render cards
     container.innerHTML=results.map(({cls,recommended})=>`<div class="finalist-pair"><div class="finalist-pair-header"><div class="finalist-class-badge">${cls}班</div><div style="font-size:0.85rem;color:var(--mid);">推薦 ${recommended.length} / 2 位</div></div><div id="afp-${cls}"></div></div>`).join('');
     results.forEach(({cls,students,recommended})=>{const el=document.getElementById(`afp-${cls}`);if(el)renderFinalistGrid(students,cls,recommended,el);});
   }catch(e){container.innerHTML=`<div style="color:var(--coral);padding:2rem;">載入失敗</div>`;}
+}
+
+function copyList(){
+  const text=document.getElementById('export-text').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=document.getElementById('copy-btn');
+    btn.textContent='✅ 已複製！';
+    setTimeout(()=>{btn.textContent='📋 複製名單';},2000);
+  });
+}
+
+function exportExcel(){
+  if(!allFinalists.length){alert('尚無名單');return;}
+  // Build CSV with BOM for Excel to recognize UTF-8
+  const bom='\uFEFF';
+  const header='班級,座號,姓名\n';
+  const rows=allFinalists.map(f=>`${f.cls}班,${f.sid},${f.name}`).join('\n');
+  const blob=new Blob([bom+header+rows],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='班際賽參賽選手名單.csv';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
 // TEACHER FINALIST
