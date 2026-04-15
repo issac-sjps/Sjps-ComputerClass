@@ -1,691 +1,762 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>電腦繪圖比賽評分系統</title>
-    <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Microsoft JhengHei', 'Segoe UI', Arial, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        h1 { text-align: center; color: white; margin-bottom: 30px; font-size: 2.5em; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
-        
-        /* 分頁導航 */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap; }
-        .tab { padding: 15px 30px; background: white; border: none; cursor: pointer; font-size: 16px; border-radius: 10px 10px 0 0; font-weight: bold; transition: all 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
-        .tab.active { background: #fff; color: #667eea; transform: translateY(2px); }
-        .tab:hover:not(.active) { background: #f0f0f0; transform: translateY(-2px); }
-        
-        .section { display: none; background: white; padding: 30px; border-radius: 0 10px 10px 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); min-height: 500px; }
-        .section.active { display: block; animation: fadeIn 0.5s; }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        /* 表單樣式 */
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; font-size: 14px; }
-        input[type="text"], input[type="number"], input[type="password"], select { 
-            width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 8px; font-size: 14px; transition: border 0.3s;
-        }
-        input[type="text"]:focus, input[type="number"]:focus, input[type="password"]:focus, select:focus {
-            border-color: #667eea; outline: none;
-        }
-        input[type="file"] { padding: 10px 0; }
-        button { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; padding: 12px 24px; 
-            border-radius: 8px; cursor: pointer; font-size: 16px; margin-right: 10px; margin-bottom: 10px;
-            font-weight: bold; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4); }
-        button:active { transform: translateY(0); }
-        button:disabled { background: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
-        button.success { background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); }
-        button.success:hover { box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4); }
-        button.danger { background: linear-gradient(135deg, #f44336 0%, #da190b 100%); }
-        button.danger:hover { box-shadow: 0 5px 15px rgba(244, 67, 54, 0.4); }
-        
-        /* 登入區 */
-        .login-box { max-width: 400px; margin: 50px auto; text-align: center; padding: 40px; background: #f8f9fa; border-radius: 15px; }
-        .login-box h2 { margin-bottom: 30px; color: #667eea; }
-        
-        /* 作品網格 */
-        .artwork-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; margin-top: 20px; }
-        .artwork-card { 
-            background: #fff; border-radius: 15px; overflow: hidden; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.3s; border: 3px solid transparent;
-        }
-        .artwork-card:hover { transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-color: #667eea; }
-        .artwork-card.scored { border-color: #4CAF50; opacity: 0.8; }
-        .artwork-img { width: 100%; height: 250px; object-fit: cover; background: #f0f0f0; }
-        .artwork-info { padding: 20px; }
-        .artwork-serial { font-size: 20px; font-weight: bold; color: #667eea; margin-bottom: 8px; }
-        .artwork-title { color: #666; margin-bottom: 15px; font-size: 14px; }
-        
-        /* 評分區 */
-        .score-input { 
-            width: 100%; padding: 10px; text-align: center; 
-            font-size: 20px; border: 3px solid #667eea; border-radius: 8px; 
-            font-weight: bold; margin-bottom: 10px;
-        }
-        .score-label { font-size: 13px; color: #888; margin-bottom: 10px; }
-        
-        /* 排名榜 */
-        .ranking-list { list-style: none; margin-top: 20px; }
-        .ranking-item { 
-            display: flex; align-items: center; padding: 20px; 
-            margin-bottom: 15px; background: #fff; border-radius: 15px; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: all 0.3s;
-        }
-        .ranking-item:hover { transform: translateX(10px); box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .ranking-item:nth-child(1) { background: linear-gradient(135deg, #fff9c4 0%, #fff59d 100%); border-left: 6px solid #ffd700; }
-        .ranking-item:nth-child(2) { background: linear-gradient(135deg, #e0e0e0 0%, #bdbdbd 100%); border-left: 6px solid #c0c0c0; }
-        .ranking-item:nth-child(3) { background: linear-gradient(135deg, #ffe0b2 0%, #ffcc80 100%); border-left: 6px solid #cd7f32; }
-        .rank-number { 
-            font-size: 32px; font-weight: bold; width: 60px; text-align: center; 
-            margin-right: 20px; color: #333; 
-        }
-        .rank-img { width: 100px; height: 100px; object-fit: cover; border-radius: 10px; margin-right: 20px; box-shadow: 0 3px 10px rgba(0,0,0,0.2); }
-        .rank-info { flex: 1; }
-        .rank-serial { font-size: 20px; font-weight: bold; color: #667eea; }
-        .rank-title { color: #666; margin: 5px 0; }
-        .rank-scores { font-size: 13px; color: #888; margin-top: 5px; }
-        .rank-score { font-size: 28px; color: #667eea; font-weight: bold; text-shadow: 1px 1px 2px rgba(0,0,0,0.1); }
-        
-        /* 進度條 */
-        .progress-container { background: #f0f0f0; padding: 20px; border-radius: 10px; margin-bottom: 30px; }
-        .progress-bar { 
-            width: 100%; height: 30px; background: #e0e0e0; 
-            border-radius: 15px; overflow: hidden; margin: 10px 0; 
-        }
-        .progress-fill { 
-            height: 100%; background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%); 
-            transition: width 0.5s ease; 
-            display: flex; align-items: center; justify-content: center; 
-            color: white; font-weight: bold; font-size: 14px;
-        }
-        .progress-text { text-align: center; color: #666; font-weight: bold; }
-        
-        .alert { padding: 15px 20px; border-radius: 8px; margin-bottom: 20px; font-weight: bold; }
-        .alert-success { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
-        .alert-error { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
-        .alert-info { background: #d1ecf1; color: #0c5460; border: 2px solid #bee5eb; }
-        .hidden { display: none !important; }
-        .loading { text-align: center; padding: 60px 20px; color: #666; font-size: 18px; }
-        .loading::after { content: '...'; animation: dots 1.5s steps(4, end) infinite; }
-        @keyframes dots { 0%, 20% { content: ''; } 40% { content: '.'; } 60% { content: '..'; } 80%, 100% { content: '...'; } }
-        
-        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
-        .stat-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px; text-align: center; }
-        .stat-number { font-size: 32px; font-weight: bold; margin-bottom: 5px; }
-        .stat-label { font-size: 14px; opacity: 0.9; }
-        
-        @media (max-width: 768px) {
-            .tabs { flex-direction: column; }
-            .tab { border-radius: 10px; margin-bottom: 5px; }
-            .artwork-grid { grid-template-columns: 1fr; }
-            .ranking-item { flex-direction: column; text-align: center; }
-            .rank-img { margin: 10px 0; }
-            .rank-number { margin-right: 0; margin-bottom: 10px; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎨 電腦繪圖比賽評分系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --brand: #6C5CE7;
+    --brand-light: #a29bfe;
+    --brand-dark: #4834d4;
+    --accent: #00b894;
+    --accent-dark: #00896f;
+    --danger: #e17055;
+    --danger-dark: #c0392b;
+    --warn: #fdcb6e;
+    --bg: #f7f6ff;
+    --surface: #ffffff;
+    --surface2: #f0eeff;
+    --border: #e2deff;
+    --text: #2d2d3a;
+    --text2: #6b6b80;
+    --text3: #a0a0b0;
+    --gold: #f9ca24;
+    --silver: #b2bec3;
+    --bronze: #e17055;
+    --radius: 12px;
+    --radius-sm: 8px;
+    --shadow: 0 2px 16px rgba(108,92,231,0.10);
+    --shadow-lg: 0 8px 32px rgba(108,92,231,0.16);
+  }
+
+  body {
+    font-family: 'Noto Sans TC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .site-header {
+    background: linear-gradient(135deg, var(--brand) 0%, var(--brand-dark) 100%);
+    color: #fff;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    pointer-events: none;
+  }
+  .site-header h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 0.25rem; position: relative; }
+  .site-header p { font-size: 0.9rem; opacity: 0.8; position: relative; }
+
+  /* ── Layout ── */
+  .container { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    gap: 6px;
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 6px;
+    margin-bottom: 1.5rem;
+    box-shadow: var(--shadow);
+  }
+  .tab {
+    flex: 1;
+    padding: 10px 8px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text2);
+    border-radius: var(--radius-sm);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+  .tab:hover { background: var(--surface2); color: var(--brand); }
+  .tab.active { background: var(--brand); color: #fff; box-shadow: 0 2px 8px rgba(108,92,231,0.3); }
+
+  /* ── Panel ── */
+  .panel { display: none; animation: fadeIn 0.2s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── Card ── */
+  .card {
+    background: var(--surface);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 1.4rem;
+    margin-bottom: 14px;
+    box-shadow: var(--shadow);
+  }
+  .card-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1.1rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-title .icon {
+    width: 28px; height: 28px;
+    background: var(--surface2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+
+  /* ── Form ── */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--text2); margin-bottom: 5px; letter-spacing: 0.3px; text-transform: uppercase; }
+  .form-group input,
+  .form-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+  .form-group input:focus,
+  .form-group select:focus {
+    border-color: var(--brand-light);
+    box-shadow: 0 0 0 3px rgba(108,92,231,0.12);
+  }
+  .form-group input::placeholder { color: var(--text3); }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 9px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px; font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+  .btn:hover { border-color: var(--brand-light); color: var(--brand); background: var(--surface2); }
+  .btn-primary { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .btn-primary:hover { background: var(--brand-dark); border-color: var(--brand-dark); color: #fff; }
+  .btn-success { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .btn-success:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; border-color: var(--danger); }
+  .btn-danger:hover { background: var(--danger-dark); border-color: var(--danger-dark); color: #fff; }
+  .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+  /* ── Works list ── */
+  .work-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 7px;
+    transition: border-color 0.15s;
+  }
+  .work-item:hover { border-color: var(--brand-light); }
+  .work-info { display: flex; flex-direction: column; gap: 2px; }
+  .work-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .work-meta { font-size: 12px; color: var(--text2); }
+  .work-actions { display: flex; gap: 6px; }
+
+  /* ── Score sliders ── */
+  .criteria-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .criteria-row:last-child { border-bottom: none; }
+  .criteria-label { font-size: 13px; font-weight: 500; color: var(--text2); width: 76px; flex-shrink: 0; }
+  .criteria-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 5px;
+    background: var(--border);
+    border-radius: 3px;
+    outline: none;
+    cursor: pointer;
+  }
+  .criteria-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--brand);
+    box-shadow: 0 1px 6px rgba(108,92,231,0.4);
+    cursor: pointer;
+    transition: transform 0.1s;
+  }
+  .criteria-slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .criteria-slider::-moz-range-thumb {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--brand);
+    border: none;
+    cursor: pointer;
+  }
+  .criteria-val { font-size: 15px; font-weight: 700; color: var(--brand); width: 34px; text-align: right; }
+
+  .total-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-top: 14px; padding-top: 14px;
+    border-top: 2px solid var(--surface2);
+  }
+  .total-label { font-size: 13px; color: var(--text2); }
+  .total-score { font-size: 32px; font-weight: 700; color: var(--brand); }
+  .total-score span { font-size: 15px; font-weight: 400; color: var(--text2); }
+
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 1.2rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem;
+    text-align: center;
+    box-shadow: var(--shadow);
+  }
+  .stat-num { font-size: 32px; font-weight: 700; color: var(--brand); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 12px; color: var(--text2); font-weight: 500; }
+
+  /* ── Rank table ── */
+  .rank-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rank-table th {
+    padding: 9px 10px; text-align: left;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.5px;
+    text-transform: uppercase; color: var(--text2);
+    border-bottom: 2px solid var(--border);
+  }
+  .rank-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .rank-table tr:last-child td { border-bottom: none; }
+  .rank-table tr:hover td { background: var(--surface2); }
+
+  .rank-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px; border-radius: 50%;
+    font-size: 12px; font-weight: 700;
+  }
+  .rank-1 { background: #fff3cd; color: #8a6800; }
+  .rank-2 { background: #e8e8ee; color: #555; }
+  .rank-3 { background: #fde8d8; color: #8a3d10; }
+  .rank-other { background: var(--bg); color: var(--text2); }
+
+  .grade-tag {
+    display: inline-block; padding: 3px 9px;
+    border-radius: 20px; font-size: 12px; font-weight: 700;
+  }
+  .grade-a { background: #d4edda; color: #155724; }
+  .grade-b { background: #cce5ff; color: #004085; }
+  .grade-c { background: #fff3cd; color: #856404; }
+  .grade-d { background: #f8d7da; color: #721c24; }
+
+  .score-bar-wrap {
+    height: 6px; background: var(--border);
+    border-radius: 3px; overflow: hidden; width: 70px;
+  }
+  .score-bar { height: 100%; background: linear-gradient(90deg, var(--brand-light), var(--brand)); border-radius: 3px; transition: width 0.5s ease; }
+
+  /* ── Score Records ── */
+  .score-record {
+    background: var(--bg); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 10px 13px;
+    margin-bottom: 7px; display: flex; align-items: flex-start; justify-content: space-between;
+  }
+  .score-record-info { flex: 1; }
+  .score-record-name { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 3px; }
+  .score-record-detail { font-size: 12px; color: var(--text2); }
+  .score-record-score {
+    font-size: 20px; font-weight: 700; color: var(--brand);
+    background: var(--surface2); padding: 4px 10px;
+    border-radius: var(--radius-sm); margin-left: 12px;
+  }
+
+  /* ── Empty State ── */
+  .empty {
+    text-align: center; padding: 2.5rem 1rem;
+    color: var(--text3); font-size: 14px;
+  }
+  .empty::before { content: '📭'; display: block; font-size: 2rem; margin-bottom: 0.75rem; }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 18px;
+    font-size: 14px; font-weight: 500;
+    color: var(--text);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 999;
+    max-width: 280px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.ok { border-color: var(--accent); color: var(--accent-dark); }
+  .toast.err { border-color: var(--danger); color: var(--danger-dark); }
+
+  /* ── Badge ── */
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: 11px; font-weight: 600;
+    background: var(--surface2); color: var(--brand);
+  }
+
+  /* ── Toolbar ── */
+  .toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.2rem; }
+  .toolbar-left { display: flex; align-items: center; gap: 8px; }
+
+  /* ── Section header inside results ── */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--text); display: flex; align-items: center; gap: 6px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+    .stats-grid { grid-template-columns: 1fr 1fr; }
+    .stats-grid .stat-card:last-child { grid-column: 1 / -1; }
+    .site-header h1 { font-size: 1.4rem; }
+    .tab { font-size: 12px; padding: 8px 4px; }
+    .rank-table th:nth-child(5),
+    .rank-table td:nth-child(5) { display: none; }
+    .rank-table th:nth-child(9),
+    .rank-table td:nth-child(9) { display: none; }
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <h1>🎨 電腦繪圖比賽評分系統</h1>
-        
-        <!-- 分頁導航 -->
-        <div class="tabs">
-            <button class="tab active" onclick="switchTab('upload')">📤 上傳作品</button>
-            <button class="tab" onclick="switchTab('judge')">✏️ 評審評分</button>
-            <button class="tab" onclick="switchTab('result')">🏆 比賽結果</button>
+
+<header class="site-header">
+  <h1>🎨 電腦繪圖比賽評分系統</h1>
+  <p>管理參賽作品 · 進行評分 · 查看比賽結果</p>
+</header>
+
+<div class="container">
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('works')">📋 作品管理</button>
+    <button class="tab" onclick="switchTab('score')">✏️ 評分</button>
+    <button class="tab" onclick="switchTab('results')">🏆 比賽結果</button>
+  </div>
+
+  <!-- ======================== 作品管理 ======================== -->
+  <div class="panel active" id="panel-works">
+
+    <div class="card">
+      <div class="card-title">
+        <span class="icon">➕</span> 新增參賽作品
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>作品名稱</label>
+          <input type="text" id="inp-name" placeholder="例：山水畫">
         </div>
-        
-        <!-- 上傳作品區 -->
-        <div id="uploadSection" class="section active">
-            <h2 style="margin-bottom: 20px; color: #667eea;">📤 上傳參賽作品</h2>
-            <div id="uploadAlert"></div>
-            <form id="uploadForm" style="background: #f8f9fa; padding: 30px; border-radius: 10px;">
-                <div class="form-group">
-                    <label>作品序號（1-18）</label>
-                    <select id="artworkSerial" required>
-                        <option value="">請選擇序號</option>
-                        ${Array.from({length: 18}, (_, i) => `<option value="${String(i+1).padStart(2, '0')}">第 ${i+1} 號作品</option>`).join('')}
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>作品標題</label>
-                    <input type="text" id="artworkTitle" required placeholder="請輸入作品名稱">
-                </div>
-                <div class="form-group">
-                    <label>作品圖片（JPG/PNG）</label>
-                    <input type="file" id="artworkFile" accept="image/*" required>
-                    <small style="color: #888; display: block; margin-top: 5px;">建議尺寸：1200x800 像素以內</small>
-                </div>
-                <button type="submit" class="success">📤 上傳作品</button>
-                <button type="button" onclick="resetUploadForm()">清空表單</button>
-            </form>
+        <div class="form-group">
+          <label>參賽者姓名</label>
+          <input type="text" id="inp-author" placeholder="例：王小明">
         </div>
-        
-        <!-- 評審評分區 -->
-        <div id="judgeSection" class="section">
-            <div id="loginPanel" class="login-box">
-                <h2>👨‍ 評審登入</h2>
-                <div class="alert alert-info" style="text-align: left; font-size: 14px;">
-                    <strong>評審帳號：</strong><br>
-                    T1 / 密碼：t1t1t1t1<br>
-                    T2 / 密碼：t2t2t2t2<br>
-                    T3 / 密碼：t3t3t3t3
-                </div>
-                <div class="form-group">
-                    <label>評審帳號</label>
-                    <input type="text" id="judgeId" placeholder="T1, T2, 或 T3" maxlength="2">
-                </div>
-                <div class="form-group">
-                    <label>密碼</label>
-                    <input type="password" id="judgePassword" placeholder="輸入密碼">
-                </div>
-                <button onclick="judgeLogin()" class="success" style="width: 100%;">登入系統</button>
-            </div>
-            
-            <div id="scoringPanel" class="hidden">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                    <h2 style="color: #667eea;">✏️ 評分作品（<span id="currentJudge" style="color: #f44336;"></span>）</h2>
-                    <button onclick="judgeLogout()" class="danger">登出</button>
-                </div>
-                
-                <div class="progress-container">
-                    <div class="progress-text">評分進度</div>
-                    <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill" style="width: 0%">0/18</div>
-                    </div>
-                </div>
-                
-                <div id="artworksList" class="artwork-grid"></div>
-            </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>參賽組別</label>
+          <select id="inp-group">
+            <option>國小組</option>
+            <option>國中組</option>
+            <option>高中組</option>
+            <option>社會組</option>
+          </select>
         </div>
-        
-        <!-- 結果展示區 -->
-        <div id="resultSection" class="section">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
-                <h2 style="color: #667eea;">🏆 比賽結果排名</h2>
-                <div>
-                    <button onclick="calculateRankings()" class="success">🔄 重新計算</button>
-                    <button onclick="exportToCSV()" style="background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);">📊 匯出 Excel</button>
-                </div>
-            </div>
-            
-            <div class="stats" id="statsContainer">
-                <div class="stat-card">
-                    <div class="stat-number" id="totalWorks">0</div>
-                    <div class="stat-label">參賽作品</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="totalScored">0</div>
-                    <div class="stat-label">已完成評分</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="avgScore">0</div>
-                    <div class="stat-label">平均分數</div>
-                </div>
-            </div>
-            
-            <div id="rankingList" class="ranking-list"></div>
+        <div class="form-group">
+          <label>作品編號</label>
+          <input type="text" id="inp-id" placeholder="例：A001">
         </div>
+      </div>
+      <button class="btn btn-primary" onclick="addWork()">➕ 新增作品</button>
     </div>
 
-    <script type="module">
-        // Firebase 設定
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, setDoc, getDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js";
+    <div class="card">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <div class="card-title" style="margin:0"><span class="icon">📋</span> 參賽作品列表</div>
+          <span class="badge" id="works-count">0 件</span>
+        </div>
+        <button class="btn btn-sm btn-danger" onclick="clearAllWorks()">🗑 清空全部</button>
+      </div>
+      <div id="works-list"><div class="empty">尚無作品，請先新增參賽作品</div></div>
+    </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAMTFeroFKqZWfOX6rjIoYP212Gy7XJi3g",
-            authDomain: "sjps-photolibrary.firebaseapp.com",
-            projectId: "sjps-photolibrary",
-            storageBucket: "sjps-photolibrary.firebasestorage.app",
-            messagingSenderId: "508898599826",
-            appId: "1:508898599826:web:49c6305f534a731c02174b",
-            measurementId: "G-QHLJ8SESZ6"
-        };
+  </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const storage = getStorage(app);
+  <!-- ======================== 評分 ======================== -->
+  <div class="panel" id="panel-score">
 
-        // Cloudinary 設定
-        const CLOUDINARY_CLOUD_NAME = "myjournalweb";
-        const CLOUDINARY_UPLOAD_PRESET = "competition_upload";
+    <div class="card">
+      <div class="card-title"><span class="icon">🎯</span> 選擇評分作品</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>選擇作品</label>
+          <select id="score-work-select">
+            <option value="">-- 請選擇作品 --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>評審姓名</label>
+          <input type="text" id="inp-judge" placeholder="評審姓名">
+        </div>
+      </div>
+    </div>
 
-        // 評審帳號密碼
-        const JUDGE_CREDENTIALS = {
-            'T1': 't1t1t1t1',
-            'T2': 't2t2t2t2',
-            'T3': 't3t3t3t3'
-        };
+    <div class="card">
+      <div class="card-title"><span class="icon">📊</span> 評分項目（各項 0–100 分）</div>
 
-        const TOTAL_ARTWORKS = 18;
-        let currentJudge = null;
+      <div class="criteria-row">
+        <span class="criteria-label">🎨 創意構思</span>
+        <input type="range" class="criteria-slider" id="s1" min="0" max="100" value="70">
+        <span class="criteria-val" id="v1">70</span>
+      </div>
+      <div class="criteria-row">
+        <span class="criteria-label">⚙️ 技術表現</span>
+        <input type="range" class="criteria-slider" id="s2" min="0" max="100" value="70">
+        <span class="criteria-val" id="v2">70</span>
+      </div>
+      <div class="criteria-row">
+        <span class="criteria-label">🌈 色彩運用</span>
+        <input type="range" class="criteria-slider" id="s3" min="0" max="100" value="70">
+        <span class="criteria-val" id="v3">70</span>
+      </div>
+      <div class="criteria-row">
+        <span class="criteria-label">✨ 整體美感</span>
+        <input type="range" class="criteria-slider" id="s4" min="0" max="100" value="70">
+        <span class="criteria-val" id="v4">70</span>
+      </div>
+      <div class="criteria-row">
+        <span class="criteria-label">💬 主題表達</span>
+        <input type="range" class="criteria-slider" id="s5" min="0" max="100" value="70">
+        <span class="criteria-val" id="v5">70</span>
+      </div>
 
-        // ========== 分頁切換 ==========
-        window.switchTab = function(tabName) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tabName + 'Section').classList.add('active');
-            
-            if (tabName === 'judge' && currentJudge) {
-                loadArtworksForScoring();
-            } else if (tabName === 'result') {
-                calculateRankings();
-            }
-        };
+      <div class="total-row">
+        <div>
+          <div class="total-label">平均總分</div>
+          <div class="total-score"><span id="total-score">70</span> <span>/ 100</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="submitScore()">✅ 提交評分</button>
+      </div>
+    </div>
 
-        // ========== 上傳作品 ==========
-        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const alertDiv = document.getElementById('uploadAlert');
-            const submitBtn = e.target.querySelector('button[type="submit"]');
-            
-            const serial = document.getElementById('artworkSerial').value;
-            const title = document.getElementById('artworkTitle').value;
-            const file = document.getElementById('artworkFile').files[0];
+    <div class="card">
+      <div class="toolbar">
+        <div class="card-title" style="margin:0"><span class="icon">📝</span> 已評分記錄</div>
+        <button class="btn btn-sm btn-danger" onclick="clearAllScores()">🗑 清空記錄</button>
+      </div>
+      <div id="score-records"><div class="empty">尚無評分記錄</div></div>
+    </div>
 
-            try {
-                submitBtn.disabled = true;
-                submitBtn.textContent = '上傳中...';
+  </div>
 
-                // 檢查是否已存在相同序號
-                const existingQuery = query(collection(db, 'competition_artworks'), where('serial', '==', serial));
-                const existingSnapshot = await getDocs(existingQuery);
-                if (!existingSnapshot.empty) {
-                    throw new Error(`序號 ${serial} 的作品已存在！`);
-                }
+  <!-- ======================== 比賽結果 ======================== -->
+  <div class="panel" id="panel-results">
 
-                // 上傳到 Cloudinary
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET);
-                formData.append('folder', 'competition_artworks');
-                formData.append('public_id', `artwork_${serial}_${Date.now()}`);
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="stat-total">0</div>
+        <div class="stat-label">參賽作品</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-scored">0</div>
+        <div class="stat-label">已完成評分</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="stat-avg">0</div>
+        <div class="stat-label">平均分數</div>
+      </div>
+    </div>
 
-                const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
-                    method: 'POST',
-                    body: formData
-                });
+    <div class="card">
+      <div class="section-header">
+        <div class="section-title">🏆 比賽結果排名</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="renderResults()">🔄 重新計算</button>
+          <button class="btn btn-success" onclick="exportCSV()">📥 匯出 CSV</button>
+        </div>
+      </div>
+      <div id="results-table"><div class="empty">尚無評分資料，請評審先進行評分</div></div>
+    </div>
 
-                if (!uploadResponse.ok) {
-                    throw new Error('圖片上傳失敗');
-                }
+  </div>
 
-                const uploadData = await uploadResponse.json();
-                const imageUrl = uploadData.secure_url;
+</div><!-- /container -->
 
-                // 儲存到 Firestore
-                await addDoc(collection(db, 'competition_artworks'), {
-                    serial: serial,
-                    title: title,
-                    imageUrl: imageUrl,
-                    uploadedAt: new Date().toISOString(),
-                    uploadedBy: 'admin'
-                });
+<div class="toast" id="toast"></div>
 
-                showAlert(alertDiv, `✅ 作品 ${serial} 上傳成功！`, 'success');
-                resetUploadForm();
-            } catch (error) {
-                console.error('上傳錯誤:', error);
-                showAlert(alertDiv, '❌ 上傳失敗：' + error.message, 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = '📤 上傳作品';
-            }
-        });
+<script>
+  // ── Data ──
+  let works = JSON.parse(localStorage.getItem('cg-works') || '[]');
+  let scores = JSON.parse(localStorage.getItem('cg-scores') || '[]');
 
-        window.resetUploadForm = function() {
-            document.getElementById('uploadForm').reset();
-            document.getElementById('uploadAlert').innerHTML = '';
-        };
+  function save() {
+    try {
+      localStorage.setItem('cg-works', JSON.stringify(works));
+      localStorage.setItem('cg-scores', JSON.stringify(scores));
+    } catch(e) {}
+  }
 
-        // ========== 評審登入 ==========
-        window.judgeLogin = function() {
-            const judgeId = document.getElementById('judgeId').value.toUpperCase().trim();
-            const password = document.getElementById('judgePassword').value;
+  // ── Tabs ──
+  function switchTab(t) {
+    const names = ['works', 'score', 'results'];
+    document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('active', names[i] === t));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + t).classList.add('active');
+    if (t === 'score') { renderScoreSelect(); renderScoreRecords(); }
+    if (t === 'results') renderResults();
+  }
 
-            if (!judgeId || !password) {
-                alert('請輸入帳號和密碼！');
-                return;
-            }
+  // ── Toast ──
+  function showToast(msg, type) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + (type || '');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2400);
+  }
 
-            if (JUDGE_CREDENTIALS[judgeId] === password) {
-                currentJudge = judgeId;
-                document.getElementById('loginPanel').classList.add('hidden');
-                document.getElementById('scoringPanel').classList.remove('hidden');
-                document.getElementById('currentJudge').textContent = judgeId;
-                loadArtworksForScoring();
-            } else {
-                alert('❌ 帳號或密碼錯誤！\n請確認：\n帳號：T1/T2/T3\n密碼：t1t1t1t1/t2t2t2t2/t3t3t3t3');
-            }
-        };
+  // ── Sliders ──
+  function updateScores() {
+    const vals = ['s1','s2','s3','s4','s5'].map(id => +document.getElementById(id).value);
+    vals.forEach((v, i) => document.getElementById('v' + (i+1)).textContent = v);
+    document.getElementById('total-score').textContent = Math.round(vals.reduce((a,b) => a+b, 0) / 5);
+  }
+  ['s1','s2','s3','s4','s5'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateScores);
+  });
 
-        window.judgeLogout = function() {
-            if (confirm('確定要登出嗎？')) {
-                currentJudge = null;
-                document.getElementById('loginPanel').classList.remove('hidden');
-                document.getElementById('scoringPanel').classList.add('hidden');
-                document.getElementById('judgeId').value = '';
-                document.getElementById('judgePassword').value = '';
-            }
-        };
+  // ── Add Work ──
+  function addWork() {
+    const name   = document.getElementById('inp-name').value.trim();
+    const author = document.getElementById('inp-author').value.trim();
+    const group  = document.getElementById('inp-group').value;
+    const id     = document.getElementById('inp-id').value.trim();
+    if (!name || !author) { showToast('請填寫作品名稱與參賽者姓名', 'err'); return; }
+    works.push({
+      id: id || 'W' + String(works.length + 1).padStart(3, '0'),
+      name, author, group,
+      created: new Date().toLocaleDateString('zh-TW')
+    });
+    save(); renderWorks();
+    document.getElementById('inp-name').value = '';
+    document.getElementById('inp-author').value = '';
+    document.getElementById('inp-id').value = '';
+    showToast('作品新增成功 ✓', 'ok');
+  }
 
-        // ========== 載入作品供評分 ==========
-        async function loadArtworksForScoring() {
-            const container = document.getElementById('artworksList');
-            container.innerHTML = '<div class="loading">載入作品中</div>';
+  // ── Render Works ──
+  function renderWorks() {
+    const el = document.getElementById('works-list');
+    document.getElementById('works-count').textContent = works.length + ' 件';
+    if (!works.length) { el.innerHTML = '<div class="empty">尚無作品，請先新增參賽作品</div>'; return; }
+    el.innerHTML = works.map((w, i) => `
+      <div class="work-item">
+        <div class="work-info">
+          <span class="work-name">${w.id} — ${w.name}</span>
+          <span class="work-meta">${w.author} · ${w.group} · 新增於 ${w.created}</span>
+        </div>
+        <div class="work-actions">
+          <button class="btn btn-sm btn-danger" onclick="deleteWork(${i})">刪除</button>
+        </div>
+      </div>`).join('');
+  }
 
-            try {
-                const querySnapshot = await getDocs(collection(db, 'competition_artworks'));
-                const artworks = [];
-                querySnapshot.forEach((doc) => {
-                    artworks.push({ id: doc.id, ...doc.data() });
-                });
+  function deleteWork(i) {
+    if (!confirm('確定刪除「' + works[i].name + '」？相關評分也會一併刪除')) return;
+    const wid = works[i].id;
+    scores = scores.filter(s => s.workId !== wid);
+    works.splice(i, 1);
+    save(); renderWorks();
+    showToast('已刪除', 'ok');
+  }
 
-                // 依序號排序
-                artworks.sort((a, b) => a.serial.localeCompare(b.serial));
+  function clearAllWorks() {
+    if (!works.length) { showToast('沒有作品可清除', 'err'); return; }
+    if (!confirm('確定清空全部作品？評分記錄也會一併清除')) return;
+    works = []; scores = [];
+    save(); renderWorks();
+    showToast('已清空全部資料', 'ok');
+  }
 
-                // 取得該評審已評分的作品
-                const scoresRef = collection(db, 'competition_scores', currentJudge, 'scores');
-                const scoresSnapshot = await getDocs(scoresRef);
-                const scoredIds = new Set();
-                scoresSnapshot.forEach((doc) => {
-                    scoredIds.add(doc.id);
-                });
+  // ── Score Select ──
+  function renderScoreSelect() {
+    const sel = document.getElementById('score-work-select');
+    sel.innerHTML = '<option value="">-- 請選擇作品 --</option>' +
+      works.map(w => `<option value="${w.id}">${w.id} — ${w.name}（${w.author}）</option>`).join('');
+  }
 
-                // 更新進度
-                updateProgress(scoredIds.size, TOTAL_ARTWORKS);
+  // ── Submit Score ──
+  function submitScore() {
+    const wid   = document.getElementById('score-work-select').value;
+    const judge = document.getElementById('inp-judge').value.trim();
+    if (!wid)   { showToast('請選擇作品', 'err'); return; }
+    if (!judge) { showToast('請填寫評審姓名', 'err'); return; }
+    const vals = ['s1','s2','s3','s4','s5'].map(id => +document.getElementById(id).value);
+    const avg  = Math.round(vals.reduce((a,b) => a+b, 0) / 5);
+    const existing = scores.findIndex(x => x.workId === wid && x.judge === judge);
+    const rec = {
+      workId: wid, judge, avg,
+      s1: vals[0], s2: vals[1], s3: vals[2], s4: vals[3], s5: vals[4],
+      time: new Date().toLocaleString('zh-TW')
+    };
+    if (existing >= 0) {
+      if (!confirm('此評審已對此作品評過分，是否覆蓋？')) return;
+      scores[existing] = rec;
+    } else {
+      scores.push(rec);
+    }
+    save(); renderScoreRecords();
+    showToast('評分提交成功 ✓', 'ok');
+  }
 
-                // 渲染作品
-                container.innerHTML = '';
-                if (artworks.length === 0) {
-                    container.innerHTML = '<div class="alert alert-info" style="grid-column: 1/-1; text-align: center;">尚無作品，請先上傳作品</div>';
-                    return;
-                }
+  // ── Score Records ──
+  function renderScoreRecords() {
+    const el = document.getElementById('score-records');
+    if (!scores.length) { el.innerHTML = '<div class="empty">尚無評分記錄</div>'; return; }
+    el.innerHTML = scores.slice().reverse().map(s => {
+      const w = works.find(x => x.id === s.workId);
+      return `<div class="score-record">
+        <div class="score-record-info">
+          <div class="score-record-name">${s.workId}${w ? ' — ' + w.name : ''} <span style="font-weight:400;font-size:12px;color:var(--text2)">by ${s.judge}</span></div>
+          <div class="score-record-detail">創意 ${s.s1} · 技術 ${s.s2} · 色彩 ${s.s3} · 美感 ${s.s4} · 主題 ${s.s5} &nbsp;|&nbsp; ${s.time}</div>
+        </div>
+        <div class="score-record-score">${s.avg}</div>
+      </div>`;
+    }).join('');
+  }
 
-                artworks.forEach(artwork => {
-                    const isScored = scoredIds.has(artwork.id);
-                    const card = createArtworkCard(artwork, isScored);
-                    container.appendChild(card);
-                });
+  function clearAllScores() {
+    if (!scores.length) { showToast('沒有記錄可清除', 'err'); return; }
+    if (!confirm('確定清空全部評分記錄？')) return;
+    scores = [];
+    save(); renderScoreRecords();
+    showToast('評分記錄已清空', 'ok');
+  }
 
-            } catch (error) {
-                console.error('載入錯誤:', error);
-                container.innerHTML = '<div class="alert alert-error">載入失敗：' + error.message + '</div>';
-            }
-        }
+  // ── Grade ──
+  function getGrade(n) {
+    if (n >= 90) return ['A', 'grade-a'];
+    if (n >= 75) return ['B', 'grade-b'];
+    if (n >= 60) return ['C', 'grade-c'];
+    return ['D', 'grade-d'];
+  }
 
-        function createArtworkCard(artwork, isScored) {
-            const div = document.createElement('div');
-            div.className = `artwork-card ${isScored ? 'scored' : ''}`;
-            div.innerHTML = `
-                <img src="${artwork.imageUrl}" class="artwork-img" alt="${artwork.title}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23ddd%22 width=%22400%22 height=%22300%22/%3E%3Ctext fill=%22%23999%22 x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22%3E圖片載入失敗%3C/text%3E%3C/svg%3E'">
-                <div class="artwork-info">
-                    <div class="artwork-serial">作品 ${artwork.serial}號</div>
-                    <div class="artwork-title">${artwork.title}</div>
-                    ${isScored ? `
-                        <div class="score-label" style="color: #4CAF50; font-weight: bold;">✓ 已完成評分</div>
-                    ` : `
-                        <input type="number" class="score-input" 
-                               id="score_${artwork.id}" 
-                               min="0" max="100" 
-                               placeholder="0-100">
-                        <div class="score-label">請輸入分數（0-100分）</div>
-                        <button onclick="submitScore('${artwork.id}', '${artwork.serial}')" 
-                                class="success"
-                                style="width: 100%;">
-                            提交評分
-                        </button>
-                    `}
-                </div>
-            `;
-            return div;
-        }
+  // ── Results ──
+  function renderResults() {
+    const scored = works.filter(w => scores.some(s => s.workId === w.id));
+    document.getElementById('stat-total').textContent  = works.length;
+    document.getElementById('stat-scored').textContent = scored.length;
+    const overallAvg = scored.length
+      ? Math.round(scored.reduce((a, w) => {
+          const ws = scores.filter(s => s.workId === w.id);
+          return a + (ws.reduce((x, s) => x + s.avg, 0) / ws.length);
+        }, 0) / scored.length)
+      : 0;
+    document.getElementById('stat-avg').textContent = overallAvg || 0;
 
-        // ========== 提交評分 ==========
-        window.submitScore = async function(artworkId, serial) {
-            const scoreInput = document.getElementById(`score_${artworkId}`);
-            const score = parseInt(scoreInput.value);
+    const el = document.getElementById('results-table');
+    if (!scored.length) { el.innerHTML = '<div class="empty">尚無評分資料，請評審先進行評分</div>'; return; }
 
-            if (isNaN(score) || score < 0 || score > 100) {
-                alert('請輸入有效的分數（0-100）');
-                scoreInput.focus();
-                return;
-            }
+    const ranked = scored.map(w => {
+      const ws   = scores.filter(s => s.workId === w.id);
+      const wavg = Math.round(ws.reduce((x, s) => x + s.avg, 0) / ws.length);
+      return { ...w, wavg, judgeCount: ws.length };
+    }).sort((a, b) => b.wavg - a.wavg);
 
-            if (!confirm(`確定要給作品 ${serial} 號 ${score} 分嗎？`)) {
-                return;
-            }
+    el.innerHTML = `<div style="overflow-x:auto"><table class="rank-table">
+      <thead><tr>
+        <th>名次</th><th>編號</th><th>作品名稱</th><th>參賽者</th>
+        <th>組別</th><th>評審數</th><th>平均分</th><th>等級</th><th>得分條</th>
+      </tr></thead>
+      <tbody>${ranked.map((w, i) => {
+        const [g, gc] = getGrade(w.wavg);
+        const badgeClass = ['rank-1','rank-2','rank-3'][i] || 'rank-other';
+        const medal = ['🥇','🥈','🥉'][i] || '';
+        return `<tr>
+          <td><span class="rank-badge ${badgeClass}">${i + 1}</span></td>
+          <td style="font-size:12px;color:var(--text2)">${w.id}</td>
+          <td style="font-weight:600">${medal} ${w.name}</td>
+          <td>${w.author}</td>
+          <td><span class="badge">${w.group}</span></td>
+          <td style="text-align:center">${w.judgeCount}</td>
+          <td style="font-weight:700;color:var(--brand);font-size:16px">${w.wavg}</td>
+          <td><span class="grade-tag ${gc}">${g}</span></td>
+          <td><div class="score-bar-wrap"><div class="score-bar" style="width:${w.wavg}%"></div></div></td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table></div>`;
+  }
 
-            const submitBtn = event.target;
-            submitBtn.disabled = true;
-            submitBtn.textContent = '提交中...';
+  // ── Export CSV ──
+  function exportCSV() {
+    const scored = works.filter(w => scores.some(s => s.workId === w.id));
+    if (!scored.length) { showToast('沒有可匯出的資料', 'err'); return; }
+    const ranked = scored.map(w => {
+      const ws   = scores.filter(s => s.workId === w.id);
+      const wavg = Math.round(ws.reduce((x, s) => x + s.avg, 0) / ws.length);
+      return { ...w, wavg, judgeCount: ws.length };
+    }).sort((a, b) => b.wavg - a.wavg);
+    let csv = '\uFEFF名次,編號,作品名稱,參賽者,組別,評審數,平均分,等級\n';
+    ranked.forEach((w, i) => {
+      const [g] = getGrade(w.wavg);
+      csv += `${i+1},${w.id},"${w.name}","${w.author}",${w.group},${w.judgeCount},${w.wavg},${g}\n`;
+    });
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = '比賽結果_' + new Date().toLocaleDateString('zh-TW') + '.csv';
+    a.click(); URL.revokeObjectURL(url);
+    showToast('CSV 匯出成功 ✓', 'ok');
+  }
 
-            try {
-                // 儲存到 competition_scores/{judgeId}/scores/{artworkId}
-                const scoreRef = doc(db, 'competition_scores', currentJudge, 'scores', artworkId);
-                await setDoc(scoreRef, {
-                    serial: serial,
-                    score: score,
-                    timestamp: new Date().toISOString(),
-                    judgeId: currentJudge
-                });
-
-                // 重新載入
-                await loadArtworksForScoring();
-                
-                // 顯示成功訊息
-                const remaining = TOTAL_ARTWORKS - document.querySelectorAll('.artwork-card.scored').length;
-                if (remaining === 0) {
-                    alert(`🎉 恭喜！您已完成所有 ${TOTAL_ARTWORKS} 件作品的評分！`);
-                } else {
-                    alert(`✅ 作品 ${serial} 評分成功！\n剩餘 ${remaining} 件作品待評分`);
-                }
-            } catch (error) {
-                console.error('評分錯誤:', error);
-                alert('❌ 評分失敗：' + error.message);
-                submitBtn.disabled = false;
-                submitBtn.textContent = '提交評分';
-            }
-        };
-
-        function updateProgress(scored, total) {
-            const fill = document.getElementById('progressFill');
-            const percentage = Math.round((scored / total) * 100);
-            fill.style.width = percentage + '%';
-            fill.textContent = `${scored}/${total} (${percentage}%)`;
-            
-            if (percentage === 100) {
-                fill.style.background = 'linear-gradient(135deg, #ffd700 0%, #ffed4e 100%)';
-                fill.textContent = '🎉 全部完成！';
-            }
-        }
-
-        // ========== 計算排名 ==========
-        window.calculateRankings = async function() {
-            const container = document.getElementById('rankingList');
-            container.innerHTML = '<div class="loading">計算排名中</div>';
-
-            try {
-                // 取得所有作品
-                const artworksSnapshot = await getDocs(collection(db, 'competition_artworks'));
-                const artworks = [];
-                artworksSnapshot.forEach((doc) => {
-                    artworks.push({ id: doc.id, ...doc.data() });
-                });
-
-                // 取得所有評審的分數
-                const judges = ['T1', 'T2', 'T3'];
-                const rankings = [];
-                let totalScoreSum = 0;
-                let scoredCount = 0;
-
-                for (const artwork of artworks) {
-                    let totalScore = 0;
-                    let judgeCount = 0;
-                    const scores = {};
-
-                    for (const judge of judges) {
-                        const scoreRef = doc(db, 'competition_scores', judge, 'scores', artwork.id);
-                        const scoreDoc = await getDoc(scoreRef);
-                        if (scoreDoc.exists()) {
-                            const score = scoreDoc.data().score;
-                            scores[judge] = score;
-                            totalScore += score;
-                            judgeCount++;
-                        }
-                    }
-
-                    if (judgeCount > 0) {
-                        const avgScore = totalScore / judgeCount;
-                        rankings.push({
-                            ...artwork,
-                            averageScore: avgScore.toFixed(2),
-                            scores: scores,
-                            judgeCount: judgeCount
-                        });
-                        totalScoreSum += avgScore;
-                        scoredCount++;
-                    }
-                }
-
-                // 排序（平均分高到低）
-                rankings.sort((a, b) => b.averageScore - a.averageScore);
-
-                // 更新統計
-                document.getElementById('totalWorks').textContent = artworks.length;
-                document.getElementById('totalScored').textContent = scoredCount;
-                document.getElementById('avgScore').textContent = scoredCount > 0 ? (totalScoreSum / scoredCount).toFixed(1) : '0';
-
-                // 顯示排名
-                container.innerHTML = '';
-                if (rankings.length === 0) {
-                    container.innerHTML = '<div class="alert alert-info" style="text-align: center;">尚無評分資料，請評審先進行評分</div>';
-                    return;
-                }
-
-                // 添加獎牌圖示
-                const medals = ['🥇', '🥈', '🥉'];
-                
-                rankings.forEach((item, index) => {
-                    const rankDiv = document.createElement('div');
-                    rankDiv.className = 'ranking-item';
-                    const medal = medals[index] || `#${index + 1}`;
-                    const scoresText = Object.entries(item.scores).map(([j, s]) => `${j}: ${s}分`).join(' | ');
-                    
-                    rankDiv.innerHTML = `
-                        <div class="rank-number">${medal}</div>
-                        <img src="${item.imageUrl}" class="rank-img" alt="作品" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3C/svg%3E'">
-                        <div class="rank-info">
-                            <div class="rank-serial">作品 ${item.serial}號</div>
-                            <div class="rank-title">${item.title}</div>
-                            <div class="rank-scores">${scoresText}</div>
-                        </div>
-                        <div class="rank-score">${item.averageScore}<small style="font-size: 14px;">分</small></div>
-                    `;
-                    container.appendChild(rankDiv);
-                });
-
-            } catch (error) {
-                console.error('計算錯誤:', error);
-                container.innerHTML = '<div class="alert alert-error">計算失敗：' + error.message + '</div>';
-            }
-        };
-
-        // ========== 匯出 CSV ==========
-        window.exportToCSV = async function() {
-            try {
-                const artworksSnapshot = await getDocs(collection(db, 'competition_artworks'));
-                const artworks = [];
-                artworksSnapshot.forEach((doc) => {
-                    artworks.push({ id: doc.id, ...doc.data() });
-                });
-
-                const judges = ['T1', 'T2', 'T3'];
-                let csv = '序號,標題,T1,T2,T3,平均分,排名\n';
-                
-                const rankings = [];
-                for (const artwork of artworks) {
-                    let totalScore = 0;
-                    let judgeCount = 0;
-                    const scores = { T1: '-', T2: '-', T3: '-' };
-
-                    for (const judge of judges) {
-                        const scoreRef = doc(db, 'competition_scores', judge, 'scores', artwork.id);
-                        const scoreDoc = await getDoc(scoreRef);
-                        if (scoreDoc.exists()) {
-                            const score = scoreDoc.data().score;
-                            scores[judge] = score;
-                            totalScore += score;
-                            judgeCount++;
-                        }
-                    }
-
-                    const avgScore = judgeCount > 0 ? (totalScore / judgeCount).toFixed(2) : '-';
-                    rankings.push({
-                        serial: artwork.serial,
-                        title: artwork.title,
-                        ...scores,
-                        averageScore: avgScore
-                    });
-                }
-
-                // 排序
-                rankings.sort((a, b) => {
-                    if (a.averageScore === '-') return 1;
-                    if (b.averageScore === '-') return -1;
-                    return parseFloat(b.averageScore) - parseFloat(a.averageScore);
-                });
-
-                // 添加排名
-                rankings.forEach((item, index) => {
-                    csv += `${item.serial},${item.title},${item.T1},${item.T2},${item.T3},${item.averageScore},${index + 1}\n`;
-                });
-
-                // 下載 CSV
-                const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
-                const link = document.createElement('a');
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', `電腦繪圖比賽成績_${new Date().toISOString().split('T')[0]}.csv`);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                alert('✅ 成績表已匯出！');
-            } catch (error) {
-                console.error('匯出錯誤:', error);
-                alert('❌ 匯出失敗：' + error.message);
-            }
-        };
-
-        // ========== 工具函數 ==========
-        function showAlert(element, message, type) {
-            element.className = `alert alert-${type}`;
-            element.textContent = message;
-            setTimeout(() => {
-                element.textContent = '';
-                element.className = '';
-            }, 5000);
-        }
-
-        // 讓函數在全域可訪問
-        window.submitScore = window.submitScore;
-        window.calculateRankings = window.calculateRankings;
-        window.exportToCSV = window.exportToCSV;
-        window.resetUploadForm = window.resetUploadForm;
-    </script>
+  // ── Init ──
+  renderWorks();
+</script>
 </body>
 </html>
