@@ -191,6 +191,12 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .lightbox-close:hover{background:rgba(255,255,255,.3)}
 .lightbox-zoom{position:fixed;top:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.8);font-size:13px;background:rgba(0,0,0,.45);padding:4px 14px;border-radius:20px;z-index:201;pointer-events:none}
 .lightbox-hint{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.45);font-size:12px;pointer-events:none;white-space:nowrap;z-index:201}
+.lb-arrow{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:201;transition:background .15s;backdrop-filter:blur(4px);font-family:inherit}
+.lb-arrow:hover{background:rgba(255,255,255,.3)}
+.lb-arrow-left{left:14px}
+.lb-arrow-right{right:60px}
+.lightbox-artnum-wrap{position:fixed;bottom:40px;left:50%;transform:translateX(-50%);z-index:201;pointer-events:none}
+#lightbox-artnum{background:rgba(0,0,0,.45);color:rgba(255,255,255,.85);font-size:13px;font-weight:600;padding:4px 14px;border-radius:20px;backdrop-filter:blur(4px)}
 
 /* Toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 18px;font-size:14px;font-weight:500;color:var(--text);box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:999;max-width:300px}
@@ -406,7 +412,13 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   </div>
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
   <div class="lightbox-zoom" id="lightbox-zoom">100%</div>
-  <div class="lightbox-hint">滾輪縮放 · 拖曳平移 · ESC 關閉</div>
+  <!-- Arrow nav -->
+  <button class="lb-arrow lb-arrow-left" onclick="lbNavigate(-1)" title="上一件 (←)">&#8592;</button>
+  <button class="lb-arrow lb-arrow-right" onclick="lbNavigate(1)" title="下一件 (→)">&#8594;</button>
+  <div class="lightbox-artnum-wrap">
+    <span id="lightbox-artnum"></span>
+  </div>
+  <div class="lightbox-hint">← → 切換作品 · 滾輪縮放 · 拖曳平移 · ESC 關閉</div>
 </div>
 
 <!-- Login Modal -->
@@ -468,24 +480,52 @@ Object.assign(window,{
   openLogin,closeLogin,doLogin,logout,showPage,
   prevArt,nextArt,submitScore,handleFiles,
   loadResults,setMode,syncFromDirect,
-  loadAdminDashboard,closeLightbox,openLightbox,exportExcel
+  loadAdminDashboard,closeLightbox,openLightbox,exportExcel,lbNavigate
 });
 
 // ── LIGHTBOX ──
-function openLightbox(src){
+let lbCurrentKey=null; // tracks which artwork key is shown, for arrow key navigation
+
+function openLightbox(src, key){
   lbScale=1; lbX=0; lbY=0;
   $('lightbox-img').src=src;
+  lbCurrentKey=key||null;
   lbApply();
+  lbUpdateNav();
   $('lightbox').classList.add('open');
   document.body.style.overflow='hidden';
 }
 function closeLightbox(){
   $('lightbox').classList.remove('open');
   document.body.style.overflow='';
+  lbCurrentKey=null;
 }
 function lbApply(){
   $('lightbox-img').style.transform=`translate(${lbX}px,${lbY}px) scale(${lbScale})`;
   $('lightbox-zoom').textContent=Math.round(lbScale*100)+'%';
+}
+function lbUpdateNav(){
+  // Update artwork number label if navigating
+  const numEl=$('lightbox-artnum');
+  if(numEl && lbCurrentKey) numEl.textContent='No. '+lbCurrentKey;
+  else if(numEl) numEl.textContent='';
+}
+function lbNavigate(dir){ // dir: -1 prev, +1 next
+  if(!lbCurrentKey) return;
+  const keys=[];
+  for(let i=1;i<=TOTAL_WORKS;i++){
+    const k=pad(i);
+    if(artImages[k]) keys.push(k);
+  }
+  const idx=keys.indexOf(lbCurrentKey);
+  if(idx===-1) return;
+  const nextIdx=idx+dir;
+  if(nextIdx<0||nextIdx>=keys.length) return;
+  const newKey=keys[nextIdx];
+  lbScale=1; lbX=0; lbY=0;
+  $('lightbox-img').src=artImages[newKey];
+  lbCurrentKey=newKey;
+  lbApply(); lbUpdateNav();
 }
 $('lightbox').addEventListener('wheel',e=>{
   e.preventDefault();
@@ -502,7 +542,12 @@ document.addEventListener('mousemove',e=>{
   lbX=lbIS.x+(e.clientX-lbDS.x); lbY=lbIS.y+(e.clientY-lbDS.y); lbApply();
 });
 document.addEventListener('mouseup',()=>{ lbDrag=false; $('lightbox').classList.remove('dragging'); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLightbox(); });
+document.addEventListener('keydown',e=>{
+  if(!$('lightbox').classList.contains('open')) return;
+  if(e.key==='Escape') closeLightbox();
+  if(e.key==='ArrowLeft')  lbNavigate(-1);
+  if(e.key==='ArrowRight') lbNavigate(+1);
+});
 
 // ── AUTH ──
 function openLogin(){ $('login-modal').classList.add('open'); $('login-user').focus(); }
@@ -589,7 +634,7 @@ async function loadGallery(){
       rankHtml=`<span class="art-rank ${cls}">${m[ri.rank-1]||'#'+ri.rank} 第${ri.rank}名</span>`;
     }
     if(url){
-      card.innerHTML=`<img src="${url}" loading="lazy" alt="作品${k}" onclick="openLightbox('${url}')" title="點擊放大">
+      card.innerHTML=`<img src="${url}" loading="lazy" alt="作品${k}" onclick="openLightbox('${url}','${k}')" title="點擊放大">
         <div class="art-card-body"><div class="art-num">No. ${k}</div>
         <div class="art-score">${ri?'平均 '+ri.avg.toFixed(1)+' 分':'尚未評分'}</div>${rankHtml}</div>`;
     } else {
@@ -607,7 +652,7 @@ async function loadScoreArt(idx){
   const k=pad(idx); await fetchImages();
   const wrap=$('score-img-wrap'), url=artImages[k];
   if(url){
-    wrap.innerHTML=`<img src="${url}" style="width:100%;max-height:480px;object-fit:contain;background:#f8f7ff;display:block;cursor:zoom-in" alt="作品${k}" onclick="openLightbox('${url}')" title="點擊放大">`;
+    wrap.innerHTML=`<img src="${url}" style="width:100%;max-height:480px;object-fit:contain;background:#f8f7ff;display:block;cursor:zoom-in" alt="作品${k}" onclick="openLightbox('${url}','${k}')" title="點擊放大">`;
   } else {
     wrap.innerHTML=`<div style="height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text3)"><span style="font-size:3rem">🖼️</span><span style="font-size:13px">尚未上傳圖片</span></div>`;
   }
@@ -767,7 +812,7 @@ async function loadResults(){
     }
     const bd=['T1','T2','T3'].map(j=>sc[j]?`<span class="breakdown-chip">評審${j.slice(1)}: ${sc[j].total}</span>`:'').join('');
     card.innerHTML=`${bh}
-      ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
+      ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}','${key}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
       <div class="result-card-body">
         <div class="result-num">No. ${key}</div>
         <div class="result-avg">${avg!==null?'平均 <strong>'+avg.toFixed(1)+'</strong> 分':'尚未評分'}</div>
@@ -801,7 +846,7 @@ async function loadAdminDashboard(){
     const jCell=s=>s?`<div class="j-total">${s.total}</div><div class="j-sub">${s.s1}/${s.s2}/${s.s3}/${s.s4}</div>`:`<div class="j-empty">—</div>`;
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><div style="display:flex;align-items:center;gap:10px">
-        ${url?`<img src="${url}" style="width:44px;height:33px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:zoom-in" loading="lazy" onclick="openLightbox('${url}')">`:`<div style="width:44px;height:33px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center">🖼</div>`}
+        ${url?`<img src="${url}" style="width:44px;height:33px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:zoom-in" loading="lazy" onclick="openLightbox('${url}','${key}')">`:`<div style="width:44px;height:33px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center">🖼</div>`}
         <strong>No. ${key}</strong></div></td>
       <td>${jCell(t1)}</td><td>${jCell(t2)}</td><td>${jCell(t3)}</td>
       <td>${avg!==null?`<div class="avg-big">${avg}</div>`:`<span class="j-empty">—</span>`}</td>
@@ -889,7 +934,7 @@ async function loadUploadedGallery(){
   const el=$('uploaded-gallery'), ks=Object.keys(artImages).sort();
   if(!ks.length){ el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text3)">尚未上傳任何作品</div>'; return; }
   el.innerHTML=ks.map(k=>`<div class="art-card" style="cursor:default">
-    <img src="${artImages[k]}" loading="lazy" alt="作品${k}" onclick="openLightbox('${artImages[k]}')" style="cursor:zoom-in">
+    <img src="${artImages[k]}" loading="lazy" alt="作品${k}" onclick="openLightbox('${artImages[k]}','${k}')" style="cursor:zoom-in">
     <div class="art-card-body"><div class="art-num">No. ${k}</div></div></div>`).join('');
 }
 
