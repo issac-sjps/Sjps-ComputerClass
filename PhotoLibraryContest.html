@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎨 電腦繪圖比賽</title>
+<title>🎨 電腦繪圖比賽｜我是小小外交官</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -17,20 +17,28 @@
   --shadow:0 2px 16px rgba(108,92,231,.10);--shadow-lg:0 8px 32px rgba(108,92,231,.16);
 }
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
-.site-header{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-dark) 100%);color:#fff;padding:1.5rem;text-align:center;box-shadow:var(--shadow-lg);position:relative}
-.site-header h1{font-size:1.7rem;font-weight:700;margin-bottom:.25rem}
-.site-header p{font-size:.9rem;opacity:.8}
-.header-nav{display:flex;justify-content:center;gap:8px;margin-top:1rem;flex-wrap:wrap}
-.nav-btn{padding:7px 16px;border-radius:20px;border:1.5px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
-.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.7)}
-.login-area{position:absolute;top:1rem;right:1rem;display:flex;align-items:center;gap:8px}
-.login-btn{padding:6px 14px;border-radius:20px;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s}
+
+/* ── Header ── */
+.site-header{background:linear-gradient(135deg,var(--brand) 0%,var(--brand-dark) 100%);color:#fff;padding:1.4rem 1rem 1rem;text-align:center;box-shadow:var(--shadow-lg);position:relative}
+.header-theme{font-size:.75rem;font-weight:500;opacity:.75;letter-spacing:.5px;text-transform:uppercase;margin-bottom:.3rem}
+.site-header h1{font-size:1.75rem;font-weight:700;margin-bottom:.2rem;display:flex;align-items:center;justify-content:center;gap:10px}
+.header-subtitle{font-size:.85rem;opacity:.75;margin-bottom:.1rem}
+.header-theme-tag{display:inline-block;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);border-radius:20px;padding:3px 14px;font-size:.8rem;font-weight:600;margin-top:.4rem;letter-spacing:.5px}
+.header-nav{display:flex;justify-content:center;gap:8px;margin-top:.9rem;flex-wrap:wrap}
+.nav-btn{padding:7px 18px;border-radius:20px;border:1.5px solid rgba(255,255,255,.4);background:transparent;color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s}
+.nav-btn:hover,.nav-btn.active{background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.8)}
+.login-area{position:absolute;top:.9rem;right:1rem;display:flex;align-items:center;gap:8px}
+.login-btn{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(255,255,255,.5);background:transparent;color:#fff;font-size:12px;cursor:pointer;font-family:inherit;transition:all .2s}
 .login-btn:hover{background:rgba(255,255,255,.2)}
-.user-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500}
-.container{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 3rem}
+.user-badge{background:rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:12px;font-weight:500}
+
+/* ── Layout ── */
+.container{max-width:1120px;margin:0 auto;padding:1.5rem 1rem 3rem}
 .page{display:none}.page.active{display:block}
 .card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:1.4rem;margin-bottom:14px;box-shadow:var(--shadow)}
 .card-title{font-size:15px;font-weight:700;color:var(--text);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+
+/* ── Buttons ── */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);font-size:14px;font-weight:500;font-family:inherit;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text);transition:all .15s}
 .btn:hover{border-color:var(--brand2);color:var(--brand);background:var(--surface2)}
 .btn-primary{background:var(--brand);color:#fff;border-color:var(--brand)}.btn-primary:hover{background:var(--brand-dark);border-color:var(--brand-dark);color:#fff}
@@ -38,16 +46,19 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .btn-danger{background:var(--danger);color:#fff;border-color:var(--danger)}.btn-danger:hover{background:var(--danger-dark);border-color:var(--danger-dark);color:#fff}
 .btn-sm{padding:5px 12px;font-size:12px}
 .btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ── Form ── */
 .form-group{margin-bottom:14px}
 .form-group label{display:block;font-size:12px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.3px}
 .form-group input,.form-group select{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text);font-size:14px;font-family:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
 .form-group input:focus,.form-group select:focus{border-color:var(--brand2);box-shadow:0 0 0 3px rgba(108,92,231,.12)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
-/* Gallery */
+/* ── Gallery ── */
 .gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:1rem}
-.art-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s;cursor:pointer}
-.art-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-lg)}
-.art-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#f0eeff}
+.art-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);transition:transform .2s,box-shadow .2s}
+.art-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:#f0eeff;cursor:zoom-in;transition:opacity .15s}
+.art-card img:hover{opacity:.92}
 .art-card-body{padding:10px 12px}
 .art-num{font-size:18px;font-weight:700;color:var(--brand)}
 .art-score{font-size:12px;color:var(--text2);margin-top:2px}
@@ -55,7 +66,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .rank-1{background:#fff3cd;color:#8a6800}.rank-2{background:#e8e8ee;color:#444}.rank-3{background:#fde8d8;color:#8a3d10}.rank-other{background:var(--surface2);color:var(--text2)}
 .no-img{width:100%;aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:2rem}
 
-/* Score layout */
+/* ── Score Page ── */
 .score-layout{display:grid;grid-template-columns:1fr 370px;gap:16px;align-items:start}
 @media(max-width:780px){.score-layout{grid-template-columns:1fr}.score-sidebar{order:-1}}
 .artwork-viewer{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow)}
@@ -70,7 +81,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .mode-btn{flex:1;padding:7px 4px;border:none;background:transparent;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--text2);font-family:inherit;transition:all .15s;text-align:center;line-height:1.2}
 .mode-btn.active{background:var(--surface);color:var(--brand);box-shadow:0 1px 4px rgba(108,92,231,.2)}
 
-/* Mode 1: Sliders */
+/* Sliders */
 .criteria-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
 .criteria-row:last-child{border-bottom:none}
 .criteria-label{font-size:12px;font-weight:500;color:var(--text2);width:70px;flex-shrink:0;line-height:1.3}
@@ -82,7 +93,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .criteria-slider::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--brand);border:none;cursor:pointer}
 .criteria-val{font-size:14px;font-weight:700;color:var(--brand);width:32px;text-align:right}
 
-/* Mode 2: Dots */
+/* Dots */
 .dots-section{padding:8px 0;border-bottom:1px solid var(--border)}
 .dots-section:last-child{border-bottom:none}
 .dots-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:7px;display:flex;justify-content:space-between;align-items:center}
@@ -92,7 +103,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .dot-btn:hover{border-color:var(--brand2);color:var(--brand);background:var(--surface2)}
 .dot-btn.selected{background:var(--brand);border-color:var(--brand);color:#fff;transform:scale(1.15);box-shadow:0 2px 8px rgba(108,92,231,.4)}
 
-/* Mode 3: Direct */
+/* Direct */
 .direct-section{padding:8px 0;border-bottom:1px solid var(--border)}
 .direct-section:last-child{border-bottom:none}
 .direct-label{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px}
@@ -102,10 +113,9 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .direct-hint{font-size:11px;color:var(--text3)}
 
 /* Total */
-.total-display{text-align:center;padding:.9rem;background:var(--surface2);border-radius:var(--radius-sm);margin:12px 0;border:2px solid transparent;transition:border-color .2s}
-.total-display:hover{border-color:var(--border)}
-.total-num{font-size:44px;font-weight:700;color:var(--brand);line-height:1;cursor:text;padding:4px 12px;border-radius:8px;transition:background .15s;display:inline-block;min-width:80px;outline:none;border:2px solid transparent}
-.total-num:focus{border-color:var(--brand);border-radius:8px;background:white}
+.total-display{text-align:center;padding:.9rem;background:var(--surface2);border-radius:var(--radius-sm);margin:12px 0}
+.total-num{font-size:44px;font-weight:700;color:var(--brand);line-height:1;cursor:text;padding:4px 12px;border-radius:8px;display:inline-block;min-width:80px;outline:none;border:2px solid transparent}
+.total-num:focus{border-color:var(--brand);background:white}
 .total-sub{font-size:12px;color:var(--text2);margin-top:4px}
 .total-edit-hint{font-size:11px;color:var(--text3);margin-top:3px}
 
@@ -135,7 +145,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
 .result-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;box-shadow:var(--shadow);position:relative}
 .result-badge{position:absolute;top:8px;left:8px;padding:4px 10px;border-radius:12px;font-size:12px;font-weight:700;z-index:2}
-.result-card img{width:100%;aspect-ratio:4/3;object-fit:cover}
+.result-card img{width:100%;aspect-ratio:4/3;object-fit:cover;cursor:zoom-in}
 .result-card-body{padding:12px}
 .result-num{font-size:22px;font-weight:700;color:var(--brand)}
 .result-avg{font-size:13px;color:var(--text2)}
@@ -148,10 +158,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .stat-num{font-size:28px;font-weight:700;color:var(--brand)}
 .stat-label{font-size:12px;color:var(--text2);margin-top:3px}
 
-/* Admin table */
+/* Admin */
 .admin-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.2rem}
 .admin-table-wrap{overflow-x:auto}
-.admin-table{width:100%;border-collapse:collapse;font-size:13px;min-width:620px}
+.admin-table{width:100%;border-collapse:collapse;font-size:13px;min-width:640px}
 .admin-table th{padding:10px 12px;text-align:center;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);border-bottom:2px solid var(--border);white-space:nowrap;background:var(--bg)}
 .admin-table th:first-child{text-align:left}
 .admin-table td{padding:9px 12px;border-bottom:1px solid var(--border);text-align:center;vertical-align:middle}
@@ -163,7 +173,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .j-empty{color:var(--text3);font-size:13px}
 .avg-big{font-size:18px;font-weight:700;color:var(--brand-dark)}
 
-/* Modal */
+/* Login Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;display:none;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:var(--radius);padding:2rem;max-width:360px;width:90%;box-shadow:var(--shadow-lg)}
@@ -171,13 +181,23 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.2rem}
 .login-error{color:var(--danger);font-size:13px;text-align:center;margin-top:.5rem;display:none}
 
+/* Lightbox */
+.lightbox{position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:200;display:none;align-items:center;justify-content:center;cursor:grab}
+.lightbox.open{display:flex}
+.lightbox.dragging{cursor:grabbing}
+.lightbox-inner{position:relative;width:100%;height:100%;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.lightbox img{position:absolute;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none;transition:none}
+.lightbox-close{position:fixed;top:14px;right:14px;width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:201;font-family:inherit;transition:background .15s}
+.lightbox-close:hover{background:rgba(255,255,255,.3)}
+.lightbox-zoom{position:fixed;top:16px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.8);font-size:13px;background:rgba(0,0,0,.45);padding:4px 14px;border-radius:20px;z-index:201;pointer-events:none}
+.lightbox-hint{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.45);font-size:12px;pointer-events:none;white-space:nowrap;z-index:201}
+
 /* Toast */
 .toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 18px;font-size:14px;font-weight:500;color:var(--text);box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:999;max-width:300px}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{border-color:var(--accent);color:var(--accent-dark)}
 .toast.err{border-color:var(--danger);color:var(--danger-dark)}
 
-.empty{text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px}
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:8px}
 .section-title{font-size:1.1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
 .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600;background:var(--surface2);color:var(--brand)}
@@ -188,19 +208,23 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   .site-header h1{font-size:1.3rem}
   .login-area{top:.5rem;right:.5rem}
   .dots-row{gap:4px}.dot-btn{width:26px;height:26px;font-size:10px}
+  .form-row{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
 
+<!-- ═══ HEADER ═══ -->
 <header class="site-header">
   <div class="login-area">
     <div class="user-badge" id="user-badge" style="display:none"></div>
     <button class="login-btn" id="header-login-btn" onclick="openLogin()">登入</button>
     <button class="login-btn" id="header-logout-btn" style="display:none" onclick="logout()">登出</button>
   </div>
+  <div class="header-theme">2025 電腦繪圖比賽</div>
   <h1>🎨 電腦繪圖比賽</h1>
-  <p>作品展覽 · 線上評分 · 結果排名</p>
+  <div class="header-subtitle">作品展覽 · 線上評分 · 結果排名</div>
+  <div class="header-theme-tag">🌏 主題：我是小小外交官</div>
   <nav class="header-nav">
     <button class="nav-btn active" id="nav-gallery" onclick="showPage('gallery')">🖼 作品展覽</button>
     <button class="nav-btn" id="nav-results" onclick="showPage('results')">🏆 比賽結果</button>
@@ -210,18 +234,24 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   </nav>
 </header>
 
+<!-- ═══ MAIN ═══ -->
 <div class="container">
 
-  <!-- Gallery -->
+  <!-- ── Gallery ── -->
   <div class="page active" id="page-gallery">
     <div class="toolbar">
       <span class="section-title">🖼 全部作品</span>
-      <span class="badge" id="gallery-count">載入中...</span>
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="badge" id="gallery-count">載入中...</span>
+        <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 下載成績 Excel</button>
+      </div>
     </div>
-    <div class="gallery-grid" id="gallery-grid"><div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)">載入作品中...</div></div>
+    <div class="gallery-grid" id="gallery-grid">
+      <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)">載入作品中...</div>
+    </div>
   </div>
 
-  <!-- Score -->
+  <!-- ── Score ── -->
   <div class="page" id="page-score">
     <div class="toolbar">
       <span class="section-title">✏️ 評分作業</span>
@@ -237,6 +267,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
             <span class="art-nav-num">作品 <span id="current-art-num">01</span> / 18</span>
             <button class="btn btn-sm" onclick="nextArt()">下一件 →</button>
           </div>
+          <div style="text-align:center;font-size:11px;color:var(--text3);padding:6px 0;border-top:1px solid var(--border)">🔍 點擊圖片可放大 · 滾輪縮放 · 拖曳平移 · ESC 關閉</div>
         </div>
         <div class="card" style="margin-top:12px">
           <div class="card-title">快速切換作品</div>
@@ -253,93 +284,39 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
             <button class="mode-btn" id="mode-btn-direct" onclick="setMode('direct')">✏️ 直接輸入</button>
           </div>
 
-          <!-- Slider mode -->
+          <!-- Slider -->
           <div id="mode-slider">
-            <div class="criteria-row">
-              <div class="criteria-label">🎭 內容寓意<div class="criteria-pct">25%</div></div>
-              <div class="slider-wrap"><input type="range" class="criteria-slider" id="sc1" min="0" max="100" value="70"></div>
-              <span class="criteria-val" id="sv1">70</span>
-            </div>
-            <div class="criteria-row">
-              <div class="criteria-label">⚙️ 技法<div class="criteria-pct">25%</div></div>
-              <div class="slider-wrap"><input type="range" class="criteria-slider" id="sc2" min="0" max="100" value="70"></div>
-              <span class="criteria-val" id="sv2">70</span>
-            </div>
-            <div class="criteria-row">
-              <div class="criteria-label">🌈 色彩<div class="criteria-pct">25%</div></div>
-              <div class="slider-wrap"><input type="range" class="criteria-slider" id="sc3" min="0" max="100" value="70"></div>
-              <span class="criteria-val" id="sv3">70</span>
-            </div>
-            <div class="criteria-row">
-              <div class="criteria-label">💡 創意<div class="criteria-pct">25%</div></div>
-              <div class="slider-wrap"><input type="range" class="criteria-slider" id="sc4" min="0" max="100" value="70"></div>
-              <span class="criteria-val" id="sv4">70</span>
-            </div>
+            <div class="criteria-row"><div class="criteria-label">🎭 內容寓意<div class="criteria-pct">25%</div></div><div class="slider-wrap"><input type="range" class="criteria-slider" id="sc1" min="0" max="100" value="70"></div><span class="criteria-val" id="sv1">70</span></div>
+            <div class="criteria-row"><div class="criteria-label">⚙️ 技法<div class="criteria-pct">25%</div></div><div class="slider-wrap"><input type="range" class="criteria-slider" id="sc2" min="0" max="100" value="70"></div><span class="criteria-val" id="sv2">70</span></div>
+            <div class="criteria-row"><div class="criteria-label">🌈 色彩<div class="criteria-pct">25%</div></div><div class="slider-wrap"><input type="range" class="criteria-slider" id="sc3" min="0" max="100" value="70"></div><span class="criteria-val" id="sv3">70</span></div>
+            <div class="criteria-row"><div class="criteria-label">💡 創意<div class="criteria-pct">25%</div></div><div class="slider-wrap"><input type="range" class="criteria-slider" id="sc4" min="0" max="100" value="70"></div><span class="criteria-val" id="sv4">70</span></div>
           </div>
 
-          <!-- Dots mode -->
+          <!-- Dots -->
           <div id="mode-dots" style="display:none">
             <p style="font-size:11px;color:var(--text3);margin-bottom:10px">點選 1–10，自動換算為百分制（×10）</p>
-            <div class="dots-section">
-              <div class="dots-label">🎭 內容寓意 <span class="dots-conv" id="dconv1">7 → 70分</span></div>
-              <div class="dots-row" id="drow1"></div>
-            </div>
-            <div class="dots-section">
-              <div class="dots-label">⚙️ 技法 <span class="dots-conv" id="dconv2">7 → 70分</span></div>
-              <div class="dots-row" id="drow2"></div>
-            </div>
-            <div class="dots-section">
-              <div class="dots-label">🌈 色彩 <span class="dots-conv" id="dconv3">7 → 70分</span></div>
-              <div class="dots-row" id="drow3"></div>
-            </div>
-            <div class="dots-section">
-              <div class="dots-label">💡 創意 <span class="dots-conv" id="dconv4">7 → 70分</span></div>
-              <div class="dots-row" id="drow4"></div>
-            </div>
+            <div class="dots-section"><div class="dots-label">🎭 內容寓意 <span class="dots-conv" id="dconv1">7 → 70分</span></div><div class="dots-row" id="drow1"></div></div>
+            <div class="dots-section"><div class="dots-label">⚙️ 技法 <span class="dots-conv" id="dconv2">7 → 70分</span></div><div class="dots-row" id="drow2"></div></div>
+            <div class="dots-section"><div class="dots-label">🌈 色彩 <span class="dots-conv" id="dconv3">7 → 70分</span></div><div class="dots-row" id="drow3"></div></div>
+            <div class="dots-section"><div class="dots-label">💡 創意 <span class="dots-conv" id="dconv4">7 → 70分</span></div><div class="dots-row" id="drow4"></div></div>
           </div>
 
-          <!-- Direct mode -->
+          <!-- Direct -->
           <div id="mode-direct" style="display:none">
             <p style="font-size:11px;color:var(--text3);margin-bottom:10px">直接輸入各項分數（0–100）</p>
-            <div class="direct-section">
-              <div class="direct-label">🎭 內容寓意（25%）</div>
-              <div class="direct-input-wrap">
-                <input type="number" class="direct-input" id="di1" min="0" max="100" value="70" oninput="syncFromDirect()">
-                <span class="direct-hint">0–100 分</span>
-              </div>
-            </div>
-            <div class="direct-section">
-              <div class="direct-label">⚙️ 技法（25%）</div>
-              <div class="direct-input-wrap">
-                <input type="number" class="direct-input" id="di2" min="0" max="100" value="70" oninput="syncFromDirect()">
-                <span class="direct-hint">0–100 分</span>
-              </div>
-            </div>
-            <div class="direct-section">
-              <div class="direct-label">🌈 色彩（25%）</div>
-              <div class="direct-input-wrap">
-                <input type="number" class="direct-input" id="di3" min="0" max="100" value="70" oninput="syncFromDirect()">
-                <span class="direct-hint">0–100 分</span>
-              </div>
-            </div>
-            <div class="direct-section">
-              <div class="direct-label">💡 創意（25%）</div>
-              <div class="direct-input-wrap">
-                <input type="number" class="direct-input" id="di4" min="0" max="100" value="70" oninput="syncFromDirect()">
-                <span class="direct-hint">0–100 分</span>
-              </div>
-            </div>
+            <div class="direct-section"><div class="direct-label">🎭 內容寓意（25%）</div><div class="direct-input-wrap"><input type="number" class="direct-input" id="di1" min="0" max="100" value="70" oninput="syncFromDirect()"><span class="direct-hint">0–100 分</span></div></div>
+            <div class="direct-section"><div class="direct-label">⚙️ 技法（25%）</div><div class="direct-input-wrap"><input type="number" class="direct-input" id="di2" min="0" max="100" value="70" oninput="syncFromDirect()"><span class="direct-hint">0–100 分</span></div></div>
+            <div class="direct-section"><div class="direct-label">🌈 色彩（25%）</div><div class="direct-input-wrap"><input type="number" class="direct-input" id="di3" min="0" max="100" value="70" oninput="syncFromDirect()"><span class="direct-hint">0–100 分</span></div></div>
+            <div class="direct-section"><div class="direct-label">💡 創意（25%）</div><div class="direct-input-wrap"><input type="number" class="direct-input" id="di4" min="0" max="100" value="70" oninput="syncFromDirect()"><span class="direct-hint">0–100 分</span></div></div>
           </div>
 
-          <!-- Total -->
           <div class="total-display">
-            <div contenteditable="true" class="total-num" id="score-total" title="直接點擊可修改總分">70</div>
+            <div contenteditable="true" class="total-num" id="score-total" title="點擊可直接修改總分">70</div>
             <div class="total-sub">加權總分（四項平均）</div>
             <div class="total-edit-hint">💡 點擊數字可直接修改總分</div>
           </div>
           <button class="btn btn-primary" style="width:100%;font-size:15px;padding:12px" onclick="submitScore()" id="submit-score-btn">✅ 提交評分</button>
         </div>
-
         <div class="score-card">
           <div class="score-card-title">📋 我的評分進度</div>
           <div id="my-progress-list" style="display:flex;flex-direction:column;gap:3px;max-height:260px;overflow-y:auto"></div>
@@ -348,7 +325,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- Results -->
+  <!-- ── Results ── -->
   <div class="page" id="page-results">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="res-total">0</div><div class="stat-label">參賽作品</div></div>
@@ -357,19 +334,22 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     </div>
     <div class="toolbar">
       <span class="section-title">🏆 排名結果</span>
-      <button class="btn" onclick="loadResults()">🔄 重新整理</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="loadResults()">🔄 重新整理</button>
+        <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 下載成績 Excel</button>
+      </div>
     </div>
     <div class="results-grid" id="results-grid"></div>
   </div>
 
-  <!-- Upload -->
+  <!-- ── Upload ── -->
   <div class="page" id="page-upload">
     <div class="card">
       <div class="card-title">📤 上傳比賽作品</div>
       <p style="font-size:13px;color:var(--text2);margin-bottom:1rem">請上傳序號 01~18 的 PNG 檔案（例如：01.png）。重複上傳同一序號會覆蓋舊圖。</p>
       <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()">
         <div style="font-size:2.5rem;margin-bottom:.5rem">📁</div>
-        <p style="color:var(--text2);font-size:14px"><strong style="color:var(--brand)">點擊選擇</strong>或拖曳 PNG 檔案到這裡</p>
+        <p style="color:var(--text2);font-size:14px"><strong style="color:var(--brand)">點擊選擇</strong>或拖曳 PNG 到這裡</p>
         <p style="font-size:12px;margin-top:6px;color:var(--text3)">支援多選，一次上傳多個</p>
       </div>
       <input type="file" id="file-input" accept=".png,.jpg,.jpeg" multiple onchange="handleFiles(this.files)">
@@ -381,7 +361,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- Admin Dashboard -->
+  <!-- ── Admin ── -->
   <div class="page" id="page-admin">
     <div class="admin-summary">
       <div class="stat-card"><div class="stat-num" id="adm-total">18</div><div class="stat-label">參賽作品</div></div>
@@ -392,7 +372,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     <div class="card">
       <div class="toolbar" style="margin-bottom:.8rem">
         <span class="section-title">📊 完整評分總覽</span>
-        <button class="btn" onclick="loadAdminDashboard()">🔄 重新整理</button>
+        <div style="display:flex;gap:8px">
+          <button class="btn" onclick="loadAdminDashboard()">🔄 重新整理</button>
+          <button class="btn btn-success" onclick="exportExcel()">📥 匯出 Excel</button>
+        </div>
       </div>
       <div class="admin-table-wrap">
         <table class="admin-table">
@@ -416,18 +399,22 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 
 </div>
 
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner" id="lightbox-inner">
+    <img id="lightbox-img" src="" alt="作品放大">
+  </div>
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <div class="lightbox-zoom" id="lightbox-zoom">100%</div>
+  <div class="lightbox-hint">滾輪縮放 · 拖曳平移 · ESC 關閉</div>
+</div>
+
 <!-- Login Modal -->
 <div class="modal-overlay" id="login-modal">
   <div class="modal">
     <h2>🔐 登入系統</h2>
-    <div class="form-group">
-      <label>帳號</label>
-      <input type="text" id="login-user" placeholder="T1 / T2 / T3 / admin" autocomplete="username">
-    </div>
-    <div class="form-group">
-      <label>密碼</label>
-      <input type="password" id="login-pass" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
+    <div class="form-group"><label>帳號</label><input type="text" id="login-user" placeholder="T1 / T2 / T3 / admin" autocomplete="username"></div>
+    <div class="form-group"><label>密碼</label><input type="password" id="login-pass" placeholder="輸入密碼" onkeydown="if(event.key==='Enter')doLogin()"></div>
     <div class="login-error" id="login-error">帳號或密碼錯誤</div>
     <div class="modal-footer">
       <button class="btn" onclick="closeLogin()">取消</button>
@@ -435,8 +422,10 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 </div>
+
 <div class="toast" id="toast"></div>
 
+<!-- ═══ SCRIPT ═══ -->
 <script type="module">
 import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
@@ -451,26 +440,69 @@ const app = initializeApp({
 });
 const db = getFirestore(app);
 
-const ACCOUNTS={
+const ACCOUNTS = {
   T1:{pass:'t1t1t1t1',role:'judge',label:'評審一'},
   T2:{pass:'t2t2t2t2',role:'judge',label:'評審二'},
   T3:{pass:'t3t3t3t3',role:'judge',label:'評審三'},
   admin:{pass:'admin',role:'admin',label:'管理員'}
 };
 const CLD_CLOUD='myjournalweb', CLD_PRESET='competition_upload', CLD_FOLDER='competition';
+const TOTAL_WORKS = 18;
 
 let currentUser=null, currentArtIdx=1;
 let artImages={}, allScores={};
-let currentMode='slider';
-let dotVals=[7,7,7,7]; // 1-10 per criterion
-let totalLocked=null; // when user directly edits the total
+let currentMode='slider', dotVals=[7,7,7,7], totalLocked=null;
 
-const pad=n=>String(n).padStart(2,'0');
-const $=id=>document.getElementById(id);
-function toast(msg,t){ const el=$('toast'); el.textContent=msg; el.className='toast '+(t||''); el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2600); }
+// Lightbox state
+let lbScale=1,lbX=0,lbY=0,lbDrag=false,lbDS={x:0,y:0},lbIS={x:0,y:0};
 
-// Expose
-Object.assign(window,{openLogin,closeLogin,doLogin,logout,showPage,prevArt,nextArt,submitScore,handleFiles,loadResults,setMode,syncFromDirect,loadAdminDashboard});
+const pad = n => String(n).padStart(2,'0');
+const $ = id => document.getElementById(id);
+function toast(msg,t){
+  const el=$('toast'); el.textContent=msg; el.className='toast '+(t||'');
+  el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+// ── Expose globals ──
+Object.assign(window,{
+  openLogin,closeLogin,doLogin,logout,showPage,
+  prevArt,nextArt,submitScore,handleFiles,
+  loadResults,setMode,syncFromDirect,
+  loadAdminDashboard,closeLightbox,openLightbox,exportExcel
+});
+
+// ── LIGHTBOX ──
+function openLightbox(src){
+  lbScale=1; lbX=0; lbY=0;
+  $('lightbox-img').src=src;
+  lbApply();
+  $('lightbox').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeLightbox(){
+  $('lightbox').classList.remove('open');
+  document.body.style.overflow='';
+}
+function lbApply(){
+  $('lightbox-img').style.transform=`translate(${lbX}px,${lbY}px) scale(${lbScale})`;
+  $('lightbox-zoom').textContent=Math.round(lbScale*100)+'%';
+}
+$('lightbox').addEventListener('wheel',e=>{
+  e.preventDefault();
+  lbScale=Math.min(10,Math.max(0.2,lbScale+(e.deltaY<0?.15:-.15)));
+  lbApply();
+},{passive:false});
+$('lightbox').addEventListener('mousedown',e=>{
+  if(e.target.closest('.lightbox-close')) return;
+  lbDrag=true; lbDS={x:e.clientX,y:e.clientY}; lbIS={x:lbX,y:lbY};
+  $('lightbox').classList.add('dragging');
+});
+document.addEventListener('mousemove',e=>{
+  if(!lbDrag) return;
+  lbX=lbIS.x+(e.clientX-lbDS.x); lbY=lbIS.y+(e.clientY-lbDS.y); lbApply();
+});
+document.addEventListener('mouseup',()=>{ lbDrag=false; $('lightbox').classList.remove('dragging'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeLightbox(); });
 
 // ── AUTH ──
 function openLogin(){ $('login-modal').classList.add('open'); $('login-user').focus(); }
@@ -510,32 +542,61 @@ function showPage(id){
 }
 
 // ── DATA ──
-async function fetchImages(){ artImages={}; try{ (await getDocs(collection(db,'artworks'))).forEach(d=>artImages[d.id]=d.data().url); }catch(e){} }
-async function fetchScores(){ allScores={}; try{ (await getDocs(collection(db,'scores'))).forEach(d=>{ const x=d.data(); if(!allScores[x.artKey])allScores[x.artKey]={}; allScores[x.artKey][x.judge]=x; }); }catch(e){} }
+async function fetchImages(){
+  artImages={};
+  try{ (await getDocs(collection(db,'artworks'))).forEach(d=>artImages[d.id]=d.data().url); }catch(e){}
+}
+async function fetchScores(){
+  allScores={};
+  try{
+    (await getDocs(collection(db,'scores'))).forEach(d=>{
+      const x=d.data();
+      if(!allScores[x.artKey]) allScores[x.artKey]={};
+      allScores[x.artKey][x.judge]=x;
+    });
+  }catch(e){}
+}
 function computeRanks(){
   const list=[];
-  for(let i=1;i<=18;i++){
-    const k=pad(i),sc=allScores[k]; if(!sc||!Object.keys(sc).length) continue;
+  for(let i=1;i<=TOTAL_WORKS;i++){
+    const k=pad(i),sc=allScores[k];
+    if(!sc||!Object.keys(sc).length) continue;
     const vs=Object.values(sc).map(s=>s.total);
     list.push({key:k,avg:vs.reduce((a,b)=>a+b,0)/vs.length,jc:vs.length});
   }
-  list.sort((a,b)=>b.avg-a.avg); list.forEach((r,i)=>r.rank=i+1); return list;
+  list.sort((a,b)=>b.avg-a.avg);
+  list.forEach((r,i)=>r.rank=i+1);
+  return list;
 }
 
 // ── GALLERY ──
 async function loadGallery(){
   await fetchImages(); await fetchScores();
   const ranked=computeRanks(), grid=$('gallery-grid');
-  $('gallery-count').textContent=Object.keys(artImages).length+' / 18 件';
+  $('gallery-count').textContent=Object.keys(artImages).length+' / '+TOTAL_WORKS+' 件';
   grid.innerHTML='';
-  for(let i=1;i<=18;i++){
-    const k=pad(i),url=artImages[k],ri=ranked.find(r=>r.key===k);
+  for(let i=1;i<=TOTAL_WORKS;i++){
+    const k=pad(i), url=artImages[k], ri=ranked.find(r=>r.key===k);
     const card=document.createElement('div'); card.className='art-card';
-    card.onclick=()=>{ if(currentUser?.role==='judge'){ currentArtIdx=i; showPage('score'); } };
+    // card hover effect
+    card.style.transition='transform .2s,box-shadow .2s';
+    card.onmouseenter=()=>{ card.style.transform='translateY(-3px)'; card.style.boxShadow='var(--shadow-lg)'; };
+    card.onmouseleave=()=>{ card.style.transform=''; card.style.boxShadow=''; };
     let rankHtml='';
-    if(ri){ const cls=ri.rank<=3?'rank-'+ri.rank:'rank-other'; const m=['🥇','🥈','🥉']; rankHtml=`<span class="art-rank ${cls}">${m[ri.rank-1]||'#'+ri.rank} 第${ri.rank}名</span>`; }
-    card.innerHTML=(url?`<img src="${url}" loading="lazy" alt="作品${k}">`:`<div class="no-img">🖼️</div>`)+
-      `<div class="art-card-body"><div class="art-num">No. ${k}</div><div class="art-score">${ri?'平均 '+ri.avg.toFixed(1)+' 分':'尚未評分'}</div>${rankHtml}</div>`;
+    if(ri){
+      const cls=ri.rank<=3?'rank-'+ri.rank:'rank-other';
+      const m=['🥇','🥈','🥉'];
+      rankHtml=`<span class="art-rank ${cls}">${m[ri.rank-1]||'#'+ri.rank} 第${ri.rank}名</span>`;
+    }
+    if(url){
+      card.innerHTML=`<img src="${url}" loading="lazy" alt="作品${k}" onclick="openLightbox('${url}')" title="點擊放大">
+        <div class="art-card-body"><div class="art-num">No. ${k}</div>
+        <div class="art-score">${ri?'平均 '+ri.avg.toFixed(1)+' 分':'尚未評分'}</div>${rankHtml}</div>`;
+    } else {
+      card.innerHTML=`<div class="no-img">🖼️</div>
+        <div class="art-card-body"><div class="art-num">No. ${k}</div>
+        <div class="art-score" style="color:var(--text3)">尚未上傳</div></div>`;
+    }
     grid.appendChild(card);
   }
 }
@@ -544,9 +605,12 @@ async function loadGallery(){
 async function loadScoreArt(idx){
   currentArtIdx=idx; totalLocked=null;
   const k=pad(idx); await fetchImages();
-  const wrap=$('score-img-wrap'),url=artImages[k];
-  wrap.innerHTML=url?`<img src="${url}" style="width:100%;max-height:480px;object-fit:contain;background:#f8f7ff;display:block" alt="作品${k}">`
-    :`<div style="height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text3)"><span style="font-size:3rem">🖼️</span><span style="font-size:13px">尚未上傳圖片</span></div>`;
+  const wrap=$('score-img-wrap'), url=artImages[k];
+  if(url){
+    wrap.innerHTML=`<img src="${url}" style="width:100%;max-height:480px;object-fit:contain;background:#f8f7ff;display:block;cursor:zoom-in" alt="作品${k}" onclick="openLightbox('${url}')" title="點擊放大">`;
+  } else {
+    wrap.innerHTML=`<div style="height:280px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--text3)"><span style="font-size:3rem">🖼️</span><span style="font-size:13px">尚未上傳圖片</span></div>`;
+  }
   $('current-art-num').textContent=k;
   $('score-judge-badge').textContent=currentUser?.label||'';
   await fetchScores();
@@ -563,13 +627,11 @@ function setAll(v1,v2,v3,v4){
   dotVals=vs.map(v=>Math.max(1,Math.min(10,Math.round(v/10))));
   refreshDots();
 }
-
 function getVals(){
   if(currentMode==='slider') return [1,2,3,4].map(i=>+$('sc'+i).value);
   if(currentMode==='dots')   return dotVals.map(v=>v*10);
   return [1,2,3,4].map(i=>Math.min(100,Math.max(0,+$('di'+i).value||0)));
 }
-
 function recalcTotal(){
   if(totalLocked!==null){ $('score-total').textContent=totalLocked; return; }
   const vs=getVals(), avg=Math.round(vs.reduce((a,b)=>a+b,0)/4);
@@ -578,34 +640,32 @@ function recalcTotal(){
 
 // Total direct edit
 const totalEl=$('score-total');
-totalEl.addEventListener('focus',()=>{ totalLocked=null; });
+totalEl.addEventListener('focus',()=>totalLocked=null);
 totalEl.addEventListener('input',()=>{
-  const v=parseInt(totalEl.textContent)||0;
-  totalLocked=Math.min(100,Math.max(0,v));
-  totalEl.textContent=totalLocked;
-  // move cursor to end
+  const v=Math.min(100,Math.max(0,parseInt(totalEl.textContent)||0));
+  totalLocked=v;
 });
-totalEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); totalEl.blur(); } });
+totalEl.addEventListener('keydown',e=>{ if(e.key==='Enter'){e.preventDefault();totalEl.blur();} });
 totalEl.addEventListener('blur',()=>{
-  const v=parseInt(totalEl.textContent)||0; totalLocked=Math.min(100,Math.max(0,v)); totalEl.textContent=totalLocked;
-  toast('總分已設為 '+totalLocked+' 分');
+  const v=Math.min(100,Math.max(0,parseInt(totalEl.textContent)||0));
+  totalLocked=v; totalEl.textContent=v;
+  toast('總分已設為 '+v+' 分');
 });
 
 // Sliders
 [1,2,3,4].forEach(i=>{
   $('sc'+i).addEventListener('input',function(){ $('sv'+i).textContent=this.value; totalLocked=null; recalcTotal(); });
 });
-
-// Direct inputs
 function syncFromDirect(){ totalLocked=null; recalcTotal(); }
 
 // Dots
 function buildDotsUI(){
   for(let ci=1;ci<=4;ci++){
-    const row=$('drow'+ci); if(!row){ return; }
+    const row=$('drow'+ci); if(!row) return;
     row.innerHTML='';
     for(let d=1;d<=10;d++){
-      const btn=document.createElement('button'); btn.className='dot-btn'+(dotVals[ci-1]===d?' selected':'');
+      const btn=document.createElement('button');
+      btn.className='dot-btn'+(dotVals[ci-1]===d?' selected':'');
       btn.textContent=d;
       const _ci=ci,_d=d;
       btn.onclick=()=>{ dotVals[_ci-1]=_d; totalLocked=null; refreshDots(); recalcTotal(); };
@@ -614,7 +674,6 @@ function buildDotsUI(){
     $('dconv'+ci).textContent=dotVals[ci-1]+' → '+(dotVals[ci-1]*10)+'分';
   }
 }
-
 function refreshDots(){
   for(let ci=1;ci<=4;ci++){
     const row=$('drow'+ci); if(!row) continue;
@@ -622,11 +681,12 @@ function refreshDots(){
     $('dconv'+ci).textContent=dotVals[ci-1]+' → '+(dotVals[ci-1]*10)+'分';
   }
 }
-
 function setMode(mode){
   currentMode=mode;
-  ['slider','dots','direct'].forEach(m=>{ $('mode-'+m).style.display=m===mode?'':'none'; $('mode-btn-'+m).classList.toggle('active',m===mode); });
-  // sync to new mode
+  ['slider','dots','direct'].forEach(m=>{
+    $('mode-'+m).style.display=m===mode?'':'none';
+    $('mode-btn-'+m).classList.toggle('active',m===mode);
+  });
   const vs=getVals();
   if(mode==='slider') vs.forEach((v,i)=>{ $('sc'+(i+1)).value=v; $('sv'+(i+1)).textContent=v; });
   if(mode==='dots'){ dotVals=vs.map(v=>Math.max(1,Math.min(10,Math.round(v/10)))); buildDotsUI(); }
@@ -636,36 +696,37 @@ function setMode(mode){
 
 function loadScoreStrip(){
   const strip=$('score-strip'); strip.innerHTML='';
-  for(let i=1;i<=18;i++){
-    const k=pad(i),chip=document.createElement('div'); chip.className='score-chip'; chip.id='chip-'+k;
+  for(let i=1;i<=TOTAL_WORKS;i++){
+    const k=pad(i),chip=document.createElement('div');
+    chip.className='score-chip'; chip.id='chip-'+k;
     chip.innerHTML=`<div class="chip-num">${k}</div>`;
-    chip.onclick=()=>loadScoreArt(i); strip.appendChild(chip);
+    chip.onclick=()=>loadScoreArt(i);
+    strip.appendChild(chip);
   }
 }
-
 async function updateStripHL(){
-  for(let i=1;i<=18;i++){
+  for(let i=1;i<=TOTAL_WORKS;i++){
     const k=pad(i),chip=$('chip-'+k); if(!chip) continue;
     chip.classList.remove('done','active-chip');
     if(allScores[k]?.[currentUser?.id]) chip.classList.add('done');
     if(i===currentArtIdx) chip.classList.add('active-chip');
   }
 }
-
 async function loadMyProgress(){
   await fetchScores();
   const el=$('my-progress-list'); el.innerHTML='';
-  for(let i=1;i<=18;i++){
+  for(let i=1;i<=TOTAL_WORKS;i++){
     const k=pad(i),sc=allScores[k]?.[currentUser?.id],row=document.createElement('div');
     row.style.cssText='display:flex;align-items:center;justify-content:space-between;padding:5px 2px;border-bottom:1px solid var(--border);font-size:13px;cursor:pointer';
-    row.innerHTML=sc?`<span>作品 ${k}</span><span style="color:var(--accent);font-weight:700">${sc.total}分 ✓</span>`
+    row.innerHTML=sc
+      ?`<span>作品 ${k}</span><span style="color:var(--accent);font-weight:700">${sc.total}分 ✓</span>`
       :`<span style="color:var(--text2)">作品 ${k}</span><span style="color:var(--text3)">未評</span>`;
-    row.onclick=()=>loadScoreArt(i); el.appendChild(row);
+    row.onclick=()=>loadScoreArt(i);
+    el.appendChild(row);
   }
 }
-
 function prevArt(){ if(currentArtIdx>1) loadScoreArt(currentArtIdx-1); }
-function nextArt(){ if(currentArtIdx<18) loadScoreArt(currentArtIdx+1); }
+function nextArt(){ if(currentArtIdx<TOTAL_WORKS) loadScoreArt(currentArtIdx+1); }
 
 async function submitScore(){
   if(!currentUser||currentUser.role!=='judge'){ toast('請先登入評審帳號','err'); return; }
@@ -679,7 +740,7 @@ async function submitScore(){
     toast('作品 '+k+' 評分成功 ✓','ok');
     await fetchScores(); loadMyProgress(); updateStripHL();
     $('already-scored-notice').style.display='block';
-    if(currentArtIdx<18) setTimeout(()=>loadScoreArt(currentArtIdx+1),800);
+    if(currentArtIdx<TOTAL_WORKS) setTimeout(()=>loadScoreArt(currentArtIdx+1),800);
   }catch(e){ toast('提交失敗：'+e.message,'err'); }
   btn.disabled=false; btn.textContent='✅ 提交評分';
 }
@@ -689,19 +750,29 @@ async function loadResults(){
   await fetchImages(); await fetchScores();
   const ranked=computeRanks(), jSet=new Set();
   Object.values(allScores).forEach(sc=>Object.keys(sc).forEach(j=>jSet.add(j)));
-  $('res-total').textContent=18; $('res-scored').textContent=ranked.length; $('res-judges').textContent=jSet.size+' / 3';
+  $('res-total').textContent=TOTAL_WORKS;
+  $('res-scored').textContent=ranked.length;
+  $('res-judges').textContent=jSet.size+' / 3';
   const grid=$('results-grid'); grid.innerHTML='';
-  const medals=['🥇','🥈','🥉'], all=[];
-  for(let i=1;i<=18;i++) all.push(pad(i));
+  const medals=['🥇','🥈','🥉'],all=[];
+  for(let i=1;i<=TOTAL_WORKS;i++) all.push(pad(i));
   const display=[...ranked,...all.filter(k=>!ranked.find(r=>r.key===k)).map(k=>({key:k,avg:null,rank:null}))];
   display.forEach(({key,avg,rank})=>{
-    const url=artImages[key],sc=allScores[key]||{},card=document.createElement('div'); card.className='result-card';
-    let bh=''; if(rank!==null){ const cls=rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other'; bh=`<div class="result-badge ${cls}">${medals[rank-1]||''} #${rank}</div>`; }
+    const url=artImages[key],sc=allScores[key]||{},card=document.createElement('div');
+    card.className='result-card';
+    let bh='';
+    if(rank!==null){
+      const cls=rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other';
+      bh=`<div class="result-badge ${cls}">${medals[rank-1]||''} #${rank}</div>`;
+    }
     const bd=['T1','T2','T3'].map(j=>sc[j]?`<span class="breakdown-chip">評審${j.slice(1)}: ${sc[j].total}</span>`:'').join('');
-    card.innerHTML=`${bh}${url?`<img src="${url}" loading="lazy" alt="作品${key}">`:`<div class="no-img" style="height:160px">🖼️</div>`}
-      <div class="result-card-body"><div class="result-num">No. ${key}</div>
-      <div class="result-avg">${avg!==null?'平均 <strong>'+avg.toFixed(1)+'</strong> 分':'尚未評分'}</div>
-      <div class="result-breakdown">${bd}</div></div>`;
+    card.innerHTML=`${bh}
+      ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
+      <div class="result-card-body">
+        <div class="result-num">No. ${key}</div>
+        <div class="result-avg">${avg!==null?'平均 <strong>'+avg.toFixed(1)+'</strong> 分':'尚未評分'}</div>
+        <div class="result-breakdown">${bd}</div>
+      </div>`;
     grid.appendChild(card);
   });
 }
@@ -712,29 +783,73 @@ async function loadAdminDashboard(){
   const ranked=computeRanks(), rankMap={};
   ranked.forEach(r=>rankMap[r.key]=r.rank);
   const cj=j=>Object.keys(allScores).filter(k=>allScores[k][j]).length;
-  $('adm-t1').textContent=cj('T1')+'/18'; $('adm-t2').textContent=cj('T2')+'/18'; $('adm-t3').textContent=cj('T3')+'/18';
-  const medals=['🥇','🥈','🥉'], all=[];
-  for(let i=1;i<=18;i++) all.push(pad(i));
+  $('adm-t1').textContent=cj('T1')+'/'+TOTAL_WORKS;
+  $('adm-t2').textContent=cj('T2')+'/'+TOTAL_WORKS;
+  $('adm-t3').textContent=cj('T3')+'/'+TOTAL_WORKS;
+  const medals=['🥇','🥈','🥉'],all=[];
+  for(let i=1;i<=TOTAL_WORKS;i++) all.push(pad(i));
   const scoredK=ranked.map(r=>r.key);
   const display=[...scoredK,...all.filter(k=>!scoredK.includes(k))];
   const tbody=$('admin-tbody'); tbody.innerHTML='';
   display.forEach(key=>{
-    const sc=allScores[key]||{}, rank=rankMap[key], url=artImages[key];
+    const sc=allScores[key]||{},rank=rankMap[key],url=artImages[key];
     const t1=sc['T1'],t2=sc['T2'],t3=sc['T3'];
-    const s3=Object.values(sc).filter(Boolean).map(s=>s.total);
-    const avg=s3.length?(s3.reduce((a,b)=>a+b,0)/s3.length).toFixed(1):null;
+    const s3v=Object.values(sc).filter(Boolean).map(s=>s.total);
+    const avg=s3v.length?(s3v.reduce((a,b)=>a+b,0)/s3v.length).toFixed(1):null;
     const rankCls=rank?(rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other'):'';
     const rankStr=rank?`${medals[rank-1]||''} #${rank} 第${rank}名`:'—';
     const jCell=s=>s?`<div class="j-total">${s.total}</div><div class="j-sub">${s.s1}/${s.s2}/${s.s3}/${s.s4}</div>`:`<div class="j-empty">—</div>`;
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><div style="display:flex;align-items:center;gap:10px">
-        ${url?`<img src="${url}" style="width:44px;height:33px;object-fit:cover;border-radius:6px;border:1px solid var(--border)" loading="lazy">`:`<div style="width:44px;height:33px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center">🖼</div>`}
+        ${url?`<img src="${url}" style="width:44px;height:33px;object-fit:cover;border-radius:6px;border:1px solid var(--border);cursor:zoom-in" loading="lazy" onclick="openLightbox('${url}')">`:`<div style="width:44px;height:33px;background:var(--surface2);border-radius:6px;display:flex;align-items:center;justify-content:center">🖼</div>`}
         <strong>No. ${key}</strong></div></td>
       <td>${jCell(t1)}</td><td>${jCell(t2)}</td><td>${jCell(t3)}</td>
       <td>${avg!==null?`<div class="avg-big">${avg}</div>`:`<span class="j-empty">—</span>`}</td>
       <td><span class="art-rank ${rankCls}" style="white-space:nowrap;font-size:12px">${rankStr}</span></td>`;
     tbody.appendChild(tr);
   });
+}
+
+// ── EXCEL EXPORT (公開，任何人皆可) ──
+async function exportExcel(){
+  toast('準備匯出...','');
+  await fetchImages(); await fetchScores();
+  const ranked=computeRanks(), rankMap={};
+  ranked.forEach(r=>rankMap[r.key]=r.rank);
+  const medals=['🥇','🥈','🥉'],all=[];
+  for(let i=1;i<=TOTAL_WORKS;i++) all.push(pad(i));
+  const scoredK=ranked.map(r=>r.key);
+  const display=[...scoredK,...all.filter(k=>!scoredK.includes(k))];
+  const headers=[
+    '名次','作品編號',
+    '評審一_總分','評審一_內容寓意','評審一_技法','評審一_色彩','評審一_創意',
+    '評審二_總分','評審二_內容寓意','評審二_技法','評審二_色彩','評審二_創意',
+    '評審三_總分','評審三_內容寓意','評審三_技法','評審三_色彩','評審三_創意',
+    '三評審平均分'
+  ];
+  const rows=[headers];
+  display.forEach(key=>{
+    const sc=allScores[key]||{},rank=rankMap[key];
+    const t1=sc['T1'],t2=sc['T2'],t3=sc['T3'];
+    const s3v=[t1,t2,t3].filter(Boolean).map(s=>s.total);
+    const avg=s3v.length?(s3v.reduce((a,b)=>a+b,0)/s3v.length).toFixed(1):'';
+    const rankStr=rank?(medals[rank-1]||'')+'第'+rank+'名':'未評分';
+    rows.push([
+      rankStr,'No.'+key,
+      t1?t1.total:'',t1?t1.s1:'',t1?t1.s2:'',t1?t1.s3:'',t1?t1.s4:'',
+      t2?t2.total:'',t2?t2.s1:'',t2?t2.s2:'',t2?t2.s3:'',t2?t2.s4:'',
+      t3?t3.total:'',t3?t3.s1:'',t3?t3.s2:'',t3?t3.s3:'',t3?t3.s4:'',
+      avg
+    ]);
+  });
+  const csv='\uFEFF'+rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='電腦繪圖比賽成績_我是小小外交官_'+new Date().toLocaleDateString('zh-TW').replace(/\//g,'-')+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('成績 Excel 匯出成功 ✓','ok');
 }
 
 // ── UPLOAD ──
@@ -744,7 +859,8 @@ async function handleFiles(files){
     const k=pad(parseInt(file.name.replace(/\.[^.]+$/,'').replace(/\D/g,''))||0);
     const item=document.createElement('div'); item.className='upload-item';
     const prev=URL.createObjectURL(file);
-    item.innerHTML=`<img src="${prev}"><div class="upload-info"><div class="upload-name">作品 ${k} — ${file.name}</div>
+    item.innerHTML=`<img src="${prev}"><div class="upload-info">
+      <div class="upload-name">作品 ${k} — ${file.name}</div>
       <div class="upload-status" id="us-${k}">準備上傳...</div>
       <div class="progress-bar-wrap"><div class="progress-bar" id="up-${k}" style="width:0"></div></div></div>`;
     list.appendChild(item);
@@ -752,12 +868,14 @@ async function handleFiles(files){
   }
   loadUploadedGallery();
 }
-
 async function uploadCLD(file,k){
   const st=$('us-'+k),pr=$('up-'+k); st.textContent='上傳中...';
-  const fd=new FormData(); fd.append('file',file); fd.append('upload_preset',CLD_PRESET); fd.append('folder',CLD_FOLDER); fd.append('public_id',k);
+  const fd=new FormData();
+  fd.append('file',file); fd.append('upload_preset',CLD_PRESET);
+  fd.append('folder',CLD_FOLDER); fd.append('public_id',k);
   try{
-    const xhr=new XMLHttpRequest(); xhr.open('POST',`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`);
+    const xhr=new XMLHttpRequest();
+    xhr.open('POST',`https://api.cloudinary.com/v1_1/${CLD_CLOUD}/image/upload`);
     xhr.upload.onprogress=e=>{ if(e.lengthComputable) pr.style.width=Math.round(e.loaded/e.total*100)+'%'; };
     const res=await new Promise((ok,rej)=>{ xhr.onload=()=>ok(JSON.parse(xhr.responseText)); xhr.onerror=rej; xhr.send(fd); });
     if(res.error) throw new Error(res.error.message);
@@ -766,19 +884,22 @@ async function uploadCLD(file,k){
     st.textContent='✓ 上傳成功'; st.style.color='var(--accent-dark)';
   }catch(e){ st.textContent='❌ '+e.message; st.style.color='var(--danger)'; }
 }
-
 async function loadUploadedGallery(){
-  await fetchImages(); const el=$('uploaded-gallery'), ks=Object.keys(artImages).sort();
+  await fetchImages();
+  const el=$('uploaded-gallery'), ks=Object.keys(artImages).sort();
   if(!ks.length){ el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text3)">尚未上傳任何作品</div>'; return; }
-  el.innerHTML=ks.map(k=>`<div class="art-card"><img src="${artImages[k]}" loading="lazy" alt="作品${k}"><div class="art-card-body"><div class="art-num">No. ${k}</div></div></div>`).join('');
+  el.innerHTML=ks.map(k=>`<div class="art-card" style="cursor:default">
+    <img src="${artImages[k]}" loading="lazy" alt="作品${k}" onclick="openLightbox('${artImages[k]}')" style="cursor:zoom-in">
+    <div class="art-card-body"><div class="art-num">No. ${k}</div></div></div>`).join('');
 }
 
-// Drag & drop
+// Drag & Drop
 const dz=$('drop-zone');
 dz.addEventListener('dragover',e=>{ e.preventDefault(); dz.classList.add('drag-over'); });
 dz.addEventListener('dragleave',()=>dz.classList.remove('drag-over'));
 dz.addEventListener('drop',e=>{ e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
 
+// ── INIT ──
 loadGallery();
 </script>
 </body>
