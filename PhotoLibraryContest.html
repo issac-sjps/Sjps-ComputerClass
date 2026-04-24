@@ -645,7 +645,14 @@ function computeRanks(){
     list.push({key:k,avg:vs.reduce((a,b)=>a+b,0)/vs.length,jc:vs.length});
   }
   list.sort((a,b)=>b.avg-a.avg);
-  list.forEach((r,i)=>r.rank=i+1);
+  // Olympic/standard ranking: ties share same rank, next rank skips
+  let rank=1;
+  list.forEach((r,i)=>{
+    if(i===0){ r.rank=1; return; }
+    if(r.avg===list[i-1].avg){ r.rank=list[i-1].rank; } // same rank as previous
+    else{ r.rank=i+1; } // skip to position
+    rank=r.rank;
+  });
   return list;
 }
 
@@ -840,8 +847,9 @@ async function loadResults(){
   top10.forEach(({key,avg,rank})=>{
     const url=artImages[key],card=document.createElement('div');
     card.className='result-card';
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
     const cls=rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other';
-    const bh=`<div class="result-badge ${cls}">${medals[rank-1]||''} #${rank}</div>`;
+    const bh=`<div class="result-badge ${cls}">${medal} #${rank}</div>`;
     card.innerHTML=`${bh}
       ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}','${key}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
       <div class="result-card-body">
@@ -924,8 +932,9 @@ async function loadFullResults(){
     card.className='result-card';
     let bh='';
     if(rank!==null){
+      const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
       const cls=rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other';
-      bh=`<div class="result-badge ${cls}">${medals[rank-1]||''} #${rank}</div>`;
+      bh=`<div class="result-badge ${cls}">${medal} #${rank}</div>`;
     }
     // breakdown: all judges or single judge detail
     let bd='';
@@ -965,7 +974,8 @@ async function loadAdminDashboard(){
     const s3v=Object.values(sc).filter(Boolean).map(s=>s.total);
     const avg=s3v.length?(s3v.reduce((a,b)=>a+b,0)/s3v.length).toFixed(1):null;
     const rankCls=rank?(rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other'):'';
-    const rankStr=rank?`${medals[rank-1]||''} #${rank} 第${rank}名`:'—';
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    const rankStr=rank?`${medal} #${rank} 第${rank}名`:'—';
     const jCell=s=>s?`<div class="j-total">${s.total}</div><div class="j-sub">${s.s1}/${s.s2}/${s.s3}/${s.s4}</div>`:`<div class="j-empty">—</div>`;
     const tr=document.createElement('tr');
     tr.innerHTML=`<td><div style="display:flex;align-items:center;gap:10px">
@@ -1001,7 +1011,8 @@ async function exportExcel(){
     const t1=sc['T1'],t2=sc['T2'],t3=sc['T3'];
     const s3v=[t1,t2,t3].filter(Boolean).map(s=>s.total);
     const avg=s3v.length?(s3v.reduce((a,b)=>a+b,0)/s3v.length).toFixed(1):'';
-    const rankStr=rank?(medals[rank-1]||'')+'第'+rank+'名':'未評分';
+    const medal=rank===1?'🥇':rank===2?'🥈':rank===3?'🥉':'';
+    const rankStr=rank?medal+'第'+rank+'名':'未評分';
     rows.push([
       rankStr,'No.'+key,
       t1?t1.total:'',t1?t1.s1:'',t1?t1.s2:'',t1?t1.s3:'',t1?t1.s4:'',
