@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>四年級電腦課繪圖作品展</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&family=Playfair+Display:wght@700;900&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --ink: #1a1208;
+      --paper: #F5F0E8;
+      --paper2: #EDE7D9;
+      --gold: #C9962A;
+      --gold-light: #E8B84B;
+      --teal: #1B6B7B;
+      --coral: #C94A2A;
+      --mid: #7A6A52;
+      --light: #BFB49A;
+      --white: #FDFAF5;
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior: smooth; }
+    body { font-family:'Noto Serif TC',serif; background:var(--paper); color:var(--ink); min-height:100vh; overflow-x:hidden; }
+
+    /* ── GRAIN OVERLAY ── */
+    body::before {
+      content:''; position:fixed; top:0; left:0; width:100%; height:100%; z-index:0; pointer-events:none;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      opacity: 0.4;
+    }
+
+    /* ── LANDING SCREEN ── */
+    #screen-landing {
+      min-height: 100vh; display:flex; flex-direction:column; align-items:center; justify-content:center;
+      padding:2rem; position:relative; z-index:1;
+      background: radial-gradient(ellipse at 30% 20%, rgba(201,150,42,0.12) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 80%, rgba(27,107,123,0.1) 0%, transparent 60%),
+                  var(--paper);
+    }
+    .landing-deco {
+      font-family:'Caveat',cursive; font-size:1rem; color:var(--gold); letter-spacing:4px; text-transform:uppercase;
+      margin-bottom:1.5rem; opacity:0.8;
+    }
+    .landing-title {
+      font-family:'Playfair Display',serif; font-weight:900;
+      font-size:clamp(2.2rem,6vw,4rem); color:var(--ink); text-align:center; line-height:1.15;
+      margin-bottom:0.6rem;
+    }
+    .landing-title span { color:var(--gold); }
+    .landing-sub {
+      font-family:'Caveat',cursive; font-size:1.3rem; color:var(--mid); text-align:center;
+      margin-bottom:3.5rem; letter-spacing:1px;
+    }
+    .landing-divider { width:80px; height:3px; background:linear-gradient(90deg,transparent,var(--gold),transparent); margin:0 auto 3rem; }
+    .class-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; max-width:540px; width:100%; }
+    .class-btn {
+      background:var(--white); border:2px solid var(--paper2); border-radius:16px;
+      padding:1.4rem 1rem; text-align:center; cursor:pointer;
+      transition:all 0.2s; position:relative; overflow:hidden;
+    }
+    .class-btn::before { content:''; position:absolute; inset:0; background:linear-gradient(135deg,rgba(201,150,42,0.08),transparent); opacity:0; transition:opacity 0.2s; }
+    .class-btn:hover { border-color:var(--gold); transform:translateY(-3px); box-shadow:0 8px 30px rgba(201,150,42,0.18); }
+    .class-btn:hover::before { opacity:1; }
+    .class-btn-num { font-family:'Playfair Display',serif; font-size:1.8rem; font-weight:700; color:var(--gold); line-height:1; }
+    .class-btn-label { font-size:0.78rem; color:var(--mid); margin-top:0.3rem; }
+
+    /* ── GALLERY SCREEN ── */
+    #screen-gallery { display:none; position:relative; z-index:1; }
+
+    /* ── STICKY HEADER ── */
+    .gallery-header {
+      background:rgba(245,240,232,0.92); backdrop-filter:blur(12px);
+      border-bottom:1px solid rgba(201,150,42,0.25);
+      padding:1rem 2rem; display:flex; align-items:center; justify-content:space-between;
+      position:sticky; top:0; z-index:100; gap:1rem; flex-wrap:wrap;
+    }
+    .gallery-header-left { display:flex; align-items:center; gap:1.2rem; }
+    .back-btn {
+      background:none; border:1.5px solid var(--light); border-radius:10px;
+      padding:0.45rem 1rem; font-family:'Noto Serif TC',serif; font-size:0.85rem;
+      color:var(--mid); cursor:pointer; transition:all 0.15s;
+    }
+    .back-btn:hover { border-color:var(--gold); color:var(--ink); }
+    .gallery-class-badge { font-family:'Playfair Display',serif; font-size:1.3rem; font-weight:700; color:var(--gold); }
+    .gallery-title-text { font-size:0.85rem; color:var(--mid); }
+
+    /* ── THEME NAV PILLS ── */
+    .theme-nav { display:flex; gap:0.5rem; flex-wrap:wrap; }
+    .theme-pill {
+      padding:0.4rem 1.1rem; border-radius:50px; border:1.5px solid var(--light);
+      background:transparent; font-family:'Noto Serif TC',serif; font-size:0.82rem;
+      color:var(--mid); cursor:pointer; transition:all 0.15s; white-space:nowrap;
+    }
+    .theme-pill:hover { border-color:var(--gold); color:var(--ink); }
+    .theme-pill.active { background:var(--ink); color:var(--paper); border-color:var(--ink); }
+
+    /* ── GALLERY BODY ── */
+    .gallery-body { padding:3rem 2rem; max-width:1400px; margin:0 auto; }
+
+    /* ── THEME SECTION ── */
+    .theme-section { margin-bottom:5rem; scroll-margin-top:90px; }
+    .theme-section-header {
+      display:flex; align-items:center; gap:1.2rem; margin-bottom:2rem;
+      padding-bottom:1rem; border-bottom:2px solid var(--paper2);
+    }
+    .theme-section-icon { font-size:2.2rem; }
+    .theme-section-title { font-family:'Playfair Display',serif; font-size:1.6rem; font-weight:700; color:var(--ink); }
+    .theme-section-count { font-family:'Caveat',cursive; font-size:1rem; color:var(--light); margin-top:2px; }
+
+    /* ── ARTWORK MASONRY GRID ── */
+    .artworks-masonry {
+      columns:5; column-gap:1rem;
+    }
+    @media(max-width:1200px){ .artworks-masonry{columns:4;} }
+    @media(max-width:900px){ .artworks-masonry{columns:3;} }
+    @media(max-width:600px){ .artworks-masonry{columns:2;} }
+    @media(max-width:380px){ .artworks-masonry{columns:1;} }
+    .artwork-item {
+      break-inside:avoid; margin-bottom:1rem;
+      border-radius:14px; overflow:hidden;
+      background:var(--white); box-shadow:0 2px 12px rgba(26,18,8,0.08);
+      cursor:pointer; transition:transform 0.2s, box-shadow 0.2s;
+      position:relative;
+    }
+    .artwork-item:hover { transform:translateY(-4px); box-shadow:0 10px 32px rgba(26,18,8,0.14); }
+    .artwork-item img { width:100%; display:block; }
+    .artwork-item .art-num {
+      position:absolute; bottom:0; left:0; right:0;
+      padding:0.5rem 0.7rem; font-family:'Caveat',cursive; font-size:0.9rem;
+      color:rgba(255,255,255,0.85); text-align:right;
+      background:linear-gradient(transparent,rgba(26,18,8,0.45));
+      opacity:0; transition:opacity 0.2s;
+    }
+    .artwork-item:hover .art-num { opacity:1; }
+    .artwork-placeholder { width:100%; padding-top:80%; background:var(--paper2); border-radius:14px; display:none; }
+
+    /* ── LOADING ── */
+    .loading { text-align:center; padding:4rem; color:var(--mid); }
+    .spinner { width:36px; height:36px; border:4px solid var(--light); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; margin:0 auto 1rem; }
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* ── LIGHTBOX WITH ZOOM & PAN ── */
+    #lightbox {
+      position:fixed; inset:0; z-index:2000; display:none;
+      background:rgba(10,8,5,0.93); align-items:center; justify-content:center;
+      animation:fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    #lightbox.active { display:flex; }
+    .lb-close {
+      position:absolute; top:16px; right:20px; color:rgba(255,255,255,0.7);
+      font-size:2rem; cursor:pointer; background:none; border:none; z-index:10;
+      line-height:1; transition:color 0.15s;
+    }
+    .lb-close:hover{color:white;}
+    .lb-hint {
+      position:absolute; bottom:18px; left:50%; transform:translateX(-50%);
+      color:rgba(255,255,255,0.45); font-size:0.78rem; letter-spacing:1px;
+      font-family:'Caveat',cursive; white-space:nowrap;
+    }
+    #lb-canvas-wrap {
+      width:100%; height:100%; overflow:hidden; position:relative; cursor:grab;
+    }
+    #lb-canvas-wrap.dragging { cursor:grabbing; }
+    #lb-img-el {
+      position:absolute; top:50%; left:50%;
+      transform-origin:center center;
+      max-width:88vw; max-height:88vh;
+      border-radius:6px; box-shadow:0 20px 80px rgba(0,0,0,0.6);
+      user-select:none; pointer-events:none;
+      transition:none;
+    }
+
+    /* ── STAGGER ANIMATION ── */
+    .artwork-item { animation:slideUp 0.35s ease both; }
+    @keyframes slideUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  </style>
+</head>
+<body>
+
+<!-- LANDING -->
+<div id="screen-landing">
+  <div class="landing-deco">🎨 四年級電腦課</div>
+  <div class="landing-title">繪圖作品<span>展示</span></div>
+  <div class="landing-sub">Microsoft 小畫家 · 三大主題創作</div>
+  <div class="landing-divider"></div>
+  <div class="class-grid">
+    <div class="class-btn" onclick="enterGallery('401')"><div class="class-btn-num">401</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('402')"><div class="class-btn-num">402</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('403')"><div class="class-btn-num">403</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('404')"><div class="class-btn-num">404</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('405')"><div class="class-btn-num">405</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('406')"><div class="class-btn-num">406</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('407')"><div class="class-btn-num">407</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('408')"><div class="class-btn-num">408</div><div class="class-btn-label">班</div></div>
+    <div class="class-btn" onclick="enterGallery('409')"><div class="class-btn-num">409</div><div class="class-btn-label">班</div></div>
+  </div>
+</div>
+
+<!-- GALLERY -->
+<div id="screen-gallery">
+  <div class="gallery-header">
+    <div class="gallery-header-left">
+      <button class="back-btn" onclick="goBack()">← 返回</button>
+      <div>
+        <div class="gallery-class-badge" id="gallery-class-badge">401班</div>
+        <div class="gallery-title-text">四年級電腦課繪圖作品展示</div>
+      </div>
+    </div>
+    <div class="theme-nav">
+      <div class="theme-pill active" onclick="scrollToTheme('haidi',this)">🐠 海底世界</div>
+      <div class="theme-pill" onclick="scrollToTheme('shuiguo',this)">🍎 水果交通工具</div>
+      <div class="theme-pill" onclick="scrollToTheme('wenju',this)">✏️ 文具城市</div>
+    </div>
+  </div>
+  <div class="gallery-body">
+    <div id="gallery-content"><div class="loading"><div class="spinner"></div>載入中...</div></div>
+  </div>
+</div>
+
+<!-- LIGHTBOX -->
+<div id="lightbox">
+  <button class="lb-close" onclick="closeLightbox()">✕</button>
+  <div id="lb-canvas-wrap">
+    <img id="lb-img-el" src="" alt="" draggable="false">
+  </div>
+  <div class="lb-hint">滾輪放大縮小 · 拖曳移動 · ESC 關閉</div>
+</div>
+
+<script>
+const CLOUD_NAME = 'myjournalweb';
+const THEMES = [
+  { key:'haidi',   id:'haidi',    label:'海底世界的秘密',    emoji:'🐠', folder:'海底世界的秘密' },
+  { key:'shuiguo', id:'shuiguo',  label:'當水果變成交通工具', emoji:'🍎', folder:'當水果變成交通工具' },
+  { key:'wenju',   id:'wenju',    label:'文具盒裡的城市',    emoji:'✏️', folder:'文具盒裡的城市' },
+];
+
+firebase.initializeApp({
+  apiKey:"AIzaSyAMTFeroFKqZWfOX6rjIoYP212Gy7XJi3g",
+  authDomain:"sjps-photolibrary.firebaseapp.com",
+  projectId:"sjps-photolibrary",
+  storageBucket:"sjps-photolibrary.firebasestorage.app",
+  messagingSenderId:"508898599826",
+  appId:"1:508898599826:web:49c6305f534a731c02174b"
+});
+const db = firebase.firestore();
+
+let currentClass = null;
+
+function getImgUrl(folder, sid) {
+  return `https://res.cloudinary.com/${CLOUD_NAME}/image/upload/${encodeURIComponent(folder)}/${sid}.png`;
+}
+
+async function enterGallery(cls) {
+  currentClass = cls;
+  document.getElementById('screen-landing').style.display = 'none';
+  document.getElementById('screen-gallery').style.display = 'block';
+  document.getElementById('gallery-class-badge').textContent = cls + '班';
+  window.scrollTo(0,0);
+
+  const content = document.getElementById('gallery-content');
+  content.innerHTML = '<div class="loading"><div class="spinner"></div>載入名單中...</div>';
+
+  try {
+    const doc = await db.collection('classes').doc(cls).get();
+    let students = [];
+    if (doc.exists && doc.data().students) {
+      students = [...doc.data().students].sort((a,b) => a.num - b.num);
+    }
+
+    if (!students.length) {
+      content.innerHTML = '<div style="text-align:center;padding:4rem;color:var(--mid);">⚠️ 此班尚無名單</div>';
+      return;
+    }
+
+    content.innerHTML = THEMES.map(t => `
+      <section class="theme-section" id="section-${t.key}">
+        <div class="theme-section-header">
+          <div class="theme-section-icon">${t.emoji}</div>
+          <div>
+            <div class="theme-section-title">${t.label}</div>
+            <div class="theme-section-count">${students.length} 件作品</div>
+          </div>
+        </div>
+        <div class="artworks-masonry" id="grid-${t.key}">
+          ${students.map((s,i) => {
+            const sid = cls + String(s.num).padStart(2,'0');
+            const url = getImgUrl(t.folder, sid);
+            return `<div class="artwork-item" style="animation-delay:${i*0.03}s" onclick="openLightbox('${url}')">
+              <img src="${url}" alt="作品${sid}"
+                onerror="this.parentElement.style.display='none'"
+                onload="this.parentElement.style.display='block'">
+              <div class="art-num">#${String(s.num).padStart(2,'0')}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </section>
+    `).join('');
+
+  } catch(e) {
+    content.innerHTML = `<div style="text-align:center;padding:4rem;color:#c94a2a;">載入失敗：${e.message}</div>`;
+  }
+}
+
+function goBack() {
+  document.getElementById('screen-gallery').style.display = 'none';
+  document.getElementById('screen-landing').style.display = 'flex';
+  // reset theme pills
+  document.querySelectorAll('.theme-pill').forEach((p,i)=>p.classList.toggle('active',i===0));
+}
+
+function scrollToTheme(key, el) {
+  document.querySelectorAll('.theme-pill').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  const sec = document.getElementById('section-'+key);
+  if (sec) sec.scrollIntoView({behavior:'smooth'});
+}
+
+// ── LIGHTBOX WITH ZOOM + PAN ──
+let lbScale = 1, lbX = 0, lbY = 0;
+let isDragging = false, dragStartX = 0, dragStartY = 0, dragOriginX = 0, dragOriginY = 0;
+const lbImg = document.getElementById('lb-img-el');
+const lbWrap = document.getElementById('lb-canvas-wrap');
+
+function openLightbox(url) {
+  lbImg.src = url;
+  lbScale = 1; lbX = 0; lbY = 0;
+  applyTransform();
+  document.getElementById('lightbox').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('active');
+  document.body.style.overflow = '';
+}
+function applyTransform() {
+  lbImg.style.transform = `translate(calc(-50% + ${lbX}px), calc(-50% + ${lbY}px)) scale(${lbScale})`;
+}
+
+// Wheel zoom
+lbWrap.addEventListener('wheel', e => {
+  e.preventDefault();
+  const delta = e.deltaY > 0 ? -0.12 : 0.12;
+  lbScale = Math.min(Math.max(0.3, lbScale + delta), 6);
+  applyTransform();
+}, { passive: false });
+
+// Drag pan
+lbWrap.addEventListener('mousedown', e => {
+  if (e.button !== 0) return;
+  isDragging = true;
+  dragStartX = e.clientX; dragStartY = e.clientY;
+  dragOriginX = lbX; dragOriginY = lbY;
+  lbWrap.classList.add('dragging');
+});
+window.addEventListener('mousemove', e => {
+  if (!isDragging) return;
+  lbX = dragOriginX + (e.clientX - dragStartX);
+  lbY = dragOriginY + (e.clientY - dragStartY);
+  applyTransform();
+});
+window.addEventListener('mouseup', () => { isDragging = false; lbWrap.classList.remove('dragging'); });
+
+// Touch zoom + pan
+let lastTouchDist = null, touchStartX = 0, touchStartY = 0, touchOriginX = 0, touchOriginY = 0;
+lbWrap.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    touchStartX = e.touches[0].clientX; touchStartY = e.touches[0].clientY;
+    touchOriginX = lbX; touchOriginY = lbY;
+  }
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    lastTouchDist = Math.hypot(dx, dy);
+  }
+}, { passive: true });
+lbWrap.addEventListener('touchmove', e => {
+  e.preventDefault();
+  if (e.touches.length === 1) {
+    lbX = touchOriginX + (e.touches[0].clientX - touchStartX);
+    lbY = touchOriginY + (e.touches[0].clientY - touchStartY);
+    applyTransform();
+  }
+  if (e.touches.length === 2) {
+    const dx = e.touches[0].clientX - e.touches[1].clientX;
+    const dy = e.touches[0].clientY - e.touches[1].clientY;
+    const dist = Math.hypot(dx, dy);
+    if (lastTouchDist) {
+      lbScale = Math.min(Math.max(0.3, lbScale * (dist / lastTouchDist)), 6);
+      applyTransform();
+    }
+    lastTouchDist = dist;
+  }
+}, { passive: false });
+lbWrap.addEventListener('touchend', () => { lastTouchDist = null; });
+
+// Double-click reset
+lbWrap.addEventListener('dblclick', () => { lbScale=1; lbX=0; lbY=0; applyTransform(); });
+
+// ESC
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeLightbox(); });
+// Click outside image
+document.getElementById('lightbox').addEventListener('click', e => {
+  if (e.target === document.getElementById('lightbox')) closeLightbox();
+});
+</script>
+</body>
+</html>
