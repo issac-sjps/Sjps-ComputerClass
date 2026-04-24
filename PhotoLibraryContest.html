@@ -670,12 +670,10 @@ async function loadGallery(){
     }
     if(url){
       card.innerHTML=`<img src="${url}" loading="lazy" alt="作品${k}" onclick="openLightbox('${url}','${k}')" title="點擊放大">
-        <div class="art-card-body"><div class="art-num">No. ${k}</div>
-        <div class="art-score">${ri?'平均 '+ri.avg.toFixed(1)+' 分':'尚未評分'}</div>${rankHtml}</div>`;
+        <div class="art-card-body"><div class="art-num">No. ${k}</div></div>`;
     } else {
       card.innerHTML=`<div class="no-img">🖼️</div>
-        <div class="art-card-body"><div class="art-num">No. ${k}</div>
-        <div class="art-score" style="color:var(--text3)">尚未上傳</div></div>`;
+        <div class="art-card-body"><div class="art-num">No. ${k}</div></div>`;
     }
     grid.appendChild(card);
   }
@@ -848,7 +846,6 @@ async function loadResults(){
       ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}','${key}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
       <div class="result-card-body">
         <div class="result-num">No. ${key}</div>
-        <div class="result-avg">平均 <strong>${avg.toFixed(1)}</strong> 分</div>
       </div>`;
     grid.appendChild(card);
   });
