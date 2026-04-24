@@ -207,6 +207,11 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:8px}
 .section-title{font-size:1.1rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px}
 .badge{display:inline-block;padding:2px 9px;border-radius:12px;font-size:11px;font-weight:600;background:var(--surface2);color:var(--brand)}
+/* Result view tabs */
+.result-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.result-tab{padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.result-tab:hover{border-color:var(--brand2);color:var(--brand)}
+.result-tab.active{background:var(--brand);color:#fff;border-color:var(--brand)}
 
 @media(max-width:600px){
   .admin-summary,.stats-row{grid-template-columns:1fr 1fr}
@@ -233,7 +238,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   <div class="header-theme-tag">🌏 主題：我是小小外交官</div>
   <nav class="header-nav">
     <button class="nav-btn active" id="nav-gallery" onclick="showPage('gallery')">🖼 作品展覽</button>
-    <button class="nav-btn" id="nav-results" onclick="showPage('results')">🏆 比賽結果</button>
+    <button class="nav-btn" id="nav-results" onclick="showPage('results')">🏆 前十名</button>
+    <button class="nav-btn" id="nav-fullresults" onclick="showPage('fullresults')">🔒 完整成績</button>
     <button class="nav-btn" id="nav-score" style="display:none" onclick="showPage('score')">✏️ 評分</button>
     <button class="nav-btn" id="nav-upload" style="display:none" onclick="showPage('upload')">📤 上傳作品</button>
     <button class="nav-btn" id="nav-admin" style="display:none" onclick="showPage('admin')">📊 成績總覽</button>
@@ -247,10 +253,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
   <div class="page active" id="page-gallery">
     <div class="toolbar">
       <span class="section-title">🖼 全部作品</span>
-      <div style="display:flex;align-items:center;gap:10px">
-        <span class="badge" id="gallery-count">載入中...</span>
-        <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 下載成績 Excel</button>
-      </div>
+      <span class="badge" id="gallery-count">載入中...</span>
     </div>
     <div class="gallery-grid" id="gallery-grid">
       <div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)">載入作品中...</div>
@@ -331,7 +334,7 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     </div>
   </div>
 
-  <!-- ── Results ── -->
+  <!-- ── Top 10 Results (public) ── -->
   <div class="page" id="page-results">
     <div class="stats-row">
       <div class="stat-card"><div class="stat-num" id="res-total">0</div><div class="stat-label">參賽作品</div></div>
@@ -339,13 +342,43 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
       <div class="stat-card"><div class="stat-num" id="res-judges">0</div><div class="stat-label">評審已評</div></div>
     </div>
     <div class="toolbar">
-      <span class="section-title">🏆 排名結果</span>
-      <div style="display:flex;gap:8px">
-        <button class="btn" onclick="loadResults()">🔄 重新整理</button>
-        <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 下載成績 Excel</button>
+      <span class="section-title">🏆 前十名結果</span>
+      <button class="btn" onclick="loadResults()">🔄 重新整理</button>
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;padding:10px 14px;background:var(--surface2);border-radius:var(--radius-sm);border-left:3px solid var(--brand2)">🎉 恭喜以下同學進入前十名！完整排名請由主辦單位查看。</p>
+    <div class="results-grid" id="results-grid"></div>
+  </div>
+
+  <!-- ── Full Results (password protected) ── -->
+  <div class="page" id="page-fullresults">
+    <!-- Password gate -->
+    <div id="fullresults-gate">
+      <div style="max-width:360px;margin:4rem auto;text-align:center">
+        <div style="font-size:3rem;margin-bottom:1rem">🔒</div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:.5rem">完整成績查看</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:1.5rem">此頁面僅供主辦單位使用，請輸入密碼</div>
+        <div class="form-group">
+          <input type="password" id="fullresults-pass" placeholder="輸入查看密碼" style="text-align:center;font-size:16px;letter-spacing:4px" onkeydown="if(event.key==='Enter')checkFullResultsPass()">
+        </div>
+        <button class="btn btn-primary" style="width:100%" onclick="checkFullResultsPass()">🔓 確認進入</button>
+        <div id="fullresults-err" style="color:var(--danger);font-size:13px;margin-top:.75rem;display:none">密碼錯誤，請再試一次</div>
       </div>
     </div>
-    <div class="results-grid" id="results-grid"></div>
+    <!-- Actual content (hidden until password entered) -->
+    <div id="fullresults-content" style="display:none">
+      <!-- Judge tabs -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:10px">
+        <div class="result-tabs">
+          <button class="result-tab active" id="rtab-all" onclick="switchResultTab('all')">🏆 綜合排名</button>
+          <button class="result-tab" id="rtab-T1" onclick="switchResultTab('T1')">👩‍⚖️ 評審一</button>
+          <button class="result-tab" id="rtab-T2" onclick="switchResultTab('T2')">👨‍⚖️ 評審二</button>
+          <button class="result-tab" id="rtab-T3" onclick="switchResultTab('T3')">👩‍⚖️ 評審三</button>
+        </div>
+        <button class="btn btn-success btn-sm" onclick="exportExcel()">📥 下載成績 Excel</button>
+      </div>
+      <div id="fullresults-subtitle" style="font-size:13px;color:var(--text2);margin-bottom:1rem"></div>
+      <div class="results-grid" id="full-results-grid"></div>
+    </div>
   </div>
 
   <!-- ── Upload ── -->
@@ -480,7 +513,8 @@ Object.assign(window,{
   openLogin,closeLogin,doLogin,logout,showPage,
   prevArt,nextArt,submitScore,handleFiles,
   loadResults,setMode,syncFromDirect,
-  loadAdminDashboard,closeLightbox,openLightbox,exportExcel,lbNavigate
+  loadAdminDashboard,closeLightbox,openLightbox,exportExcel,lbNavigate,
+  checkFullResultsPass,switchResultTab
 });
 
 // ── LIGHTBOX ──
@@ -581,6 +615,7 @@ function showPage(id){
   $('nav-'+id)?.classList.add('active');
   if(id==='gallery') loadGallery();
   if(id==='results') loadResults();
+  if(id==='fullresults') initFullResults();
   if(id==='score'){ loadScoreArt(currentArtIdx); loadMyProgress(); }
   if(id==='upload') loadUploadedGallery();
   if(id==='admin') loadAdminDashboard();
@@ -589,7 +624,7 @@ function showPage(id){
 // ── DATA ──
 async function fetchImages(){
   artImages={};
-  try{ (await getDocs(collection(db,'artworks'))).forEach(d=>artImages[d.id]=d.data().url); }catch(e){}
+  try{ (await getDocs(collection(db,'artworks'))).forEach(d=>artImages[d.id]=d.data().url); }catch(e){ console.warn('fetchImages',e); }
 }
 async function fetchScores(){
   allScores={};
@@ -599,7 +634,7 @@ async function fetchScores(){
       if(!allScores[x.artKey]) allScores[x.artKey]={};
       allScores[x.artKey][x.judge]=x;
     });
-  }catch(e){}
+  }catch(e){ console.warn('fetchScores',e); }
 }
 function computeRanks(){
   const list=[];
@@ -649,7 +684,9 @@ async function loadGallery(){
 // ── SCORE PAGE ──
 async function loadScoreArt(idx){
   currentArtIdx=idx; totalLocked=null;
-  const k=pad(idx); await fetchImages();
+  const k=pad(idx);
+  // Only fetch if we haven't loaded images yet
+  if(!Object.keys(artImages).length) await fetchImages();
   const wrap=$('score-img-wrap'), url=artImages[k];
   if(url){
     wrap.innerHTML=`<img src="${url}" style="width:100%;max-height:480px;object-fit:contain;background:#f8f7ff;display:block;cursor:zoom-in" alt="作品${k}" onclick="openLightbox('${url}','${k}')" title="點擊放大">`;
@@ -790,7 +827,7 @@ async function submitScore(){
   btn.disabled=false; btn.textContent='✅ 提交評分';
 }
 
-// ── RESULTS ──
+// ── TOP 10 RESULTS (public) ──
 async function loadResults(){
   await fetchImages(); await fetchScores();
   const ranked=computeRanks(), jSet=new Set();
@@ -799,10 +836,93 @@ async function loadResults(){
   $('res-scored').textContent=ranked.length;
   $('res-judges').textContent=jSet.size+' / 3';
   const grid=$('results-grid'); grid.innerHTML='';
-  const medals=['🥇','🥈','🥉'],all=[];
-  for(let i=1;i<=TOTAL_WORKS;i++) all.push(pad(i));
-  const display=[...ranked,...all.filter(k=>!ranked.find(r=>r.key===k)).map(k=>({key:k,avg:null,rank:null}))];
-  display.forEach(({key,avg,rank})=>{
+  const medals=['🥇','🥈','🥉'];
+  const top10=ranked.slice(0,10);
+  if(!top10.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:3rem;color:var(--text3)">尚無評分資料</div>'; return; }
+  top10.forEach(({key,avg,rank})=>{
+    const url=artImages[key],card=document.createElement('div');
+    card.className='result-card';
+    const cls=rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other';
+    const bh=`<div class="result-badge ${cls}">${medals[rank-1]||''} #${rank}</div>`;
+    card.innerHTML=`${bh}
+      ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}','${key}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
+      <div class="result-card-body">
+        <div class="result-num">No. ${key}</div>
+        <div class="result-avg">平均 <strong>${avg.toFixed(1)}</strong> 分</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+// ── FULL RESULTS (password protected) ──
+const FULL_RESULTS_PASS='073411373';
+let fullResultsUnlocked=false;
+let currentResultTab='all';
+
+function initFullResults(){
+  if(fullResultsUnlocked){ loadFullResults(); return; }
+  $('fullresults-gate').style.display='';
+  $('fullresults-content').style.display='none';
+}
+
+function checkFullResultsPass(){
+  const v=$('fullresults-pass').value;
+  if(v===FULL_RESULTS_PASS){
+    fullResultsUnlocked=true;
+    $('fullresults-gate').style.display='none';
+    $('fullresults-content').style.display='';
+    $('fullresults-err').style.display='none';
+    loadFullResults();
+  } else {
+    $('fullresults-err').style.display='block';
+    $('fullresults-pass').value='';
+    $('fullresults-pass').focus();
+  }
+}
+
+function switchResultTab(tab){
+  currentResultTab=tab;
+  ['all','T1','T2','T3'].forEach(t=>{
+    $('rtab-'+t)?.classList.toggle('active',t===tab);
+  });
+  loadFullResults();
+}
+
+async function loadFullResults(){
+  await fetchImages(); await fetchScores();
+  const grid=$('full-results-grid'); grid.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:2rem;color:var(--text3)">計算中...</div>';
+  const medals=['🥇','🥈','🥉'];
+  const all=[]; for(let i=1;i<=TOTAL_WORKS;i++) all.push(pad(i));
+
+  let ranked, subtitleText;
+
+  if(currentResultTab==='all'){
+    ranked=computeRanks();
+    subtitleText='📊 三位評審綜合平均排名（全部 '+TOTAL_WORKS+' 件）';
+    // append unscored
+    const unscoredKeys=all.filter(k=>!ranked.find(r=>r.key===k));
+    unscoredKeys.forEach(k=>ranked.push({key:k,avg:null,rank:null}));
+  } else {
+    // per-judge ranking
+    const jId=currentResultTab;
+    const jLabel={'T1':'評審一','T2':'評審二','T3':'評審三'}[jId];
+    subtitleText=`👩‍⚖️ ${jLabel} 個人評分排名`;
+    const list=[];
+    all.forEach(k=>{
+      const sc=allScores[k]?.[jId];
+      if(sc) list.push({key:k,avg:sc.total,rank:null,s1:sc.s1,s2:sc.s2,s3:sc.s3,s4:sc.s4});
+    });
+    list.sort((a,b)=>b.avg-a.avg);
+    list.forEach((r,i)=>r.rank=i+1);
+    const unscoredKeys=all.filter(k=>!list.find(r=>r.key===k));
+    unscoredKeys.forEach(k=>list.push({key:k,avg:null,rank:null}));
+    ranked=list;
+  }
+
+  $('fullresults-subtitle').textContent=subtitleText;
+  grid.innerHTML='';
+
+  ranked.forEach(({key,avg,rank,s1,s2,s3,s4})=>{
     const url=artImages[key],sc=allScores[key]||{},card=document.createElement('div');
     card.className='result-card';
     let bh='';
@@ -810,12 +930,18 @@ async function loadResults(){
       const cls=rank<=3?['rank-1','rank-2','rank-3'][rank-1]:'rank-other';
       bh=`<div class="result-badge ${cls}">${medals[rank-1]||''} #${rank}</div>`;
     }
-    const bd=['T1','T2','T3'].map(j=>sc[j]?`<span class="breakdown-chip">評審${j.slice(1)}: ${sc[j].total}</span>`:'').join('');
+    // breakdown: all judges or single judge detail
+    let bd='';
+    if(currentResultTab==='all'){
+      bd=['T1','T2','T3'].map(j=>sc[j]?`<span class="breakdown-chip">評審${j.slice(1)}: ${sc[j].total}</span>`:'').join('');
+    } else if(s1!==undefined){
+      bd=`<span class="breakdown-chip">寓意:${s1}</span><span class="breakdown-chip">技法:${s2}</span><span class="breakdown-chip">色彩:${s3}</span><span class="breakdown-chip">創意:${s4}</span>`;
+    }
     card.innerHTML=`${bh}
       ${url?`<img src="${url}" loading="lazy" alt="作品${key}" onclick="openLightbox('${url}','${key}')" title="點擊放大">`:`<div class="no-img" style="height:160px">🖼️</div>`}
       <div class="result-card-body">
         <div class="result-num">No. ${key}</div>
-        <div class="result-avg">${avg!==null?'平均 <strong>'+avg.toFixed(1)+'</strong> 分':'尚未評分'}</div>
+        <div class="result-avg">${avg!==null?'分數 <strong>'+avg.toFixed(1)+'</strong> 分':'尚未評分'}</div>
         <div class="result-breakdown">${bd}</div>
       </div>`;
     grid.appendChild(card);
