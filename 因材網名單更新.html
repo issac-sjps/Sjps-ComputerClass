@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>因才網名單更新工具</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+  :root{
+    --ink:#1f2a24;
+    --paper:#f6f4ee;
+    --line:#c9c2b2;
+    --accent:#3d5a45;
+    --accent-soft:#e4ece1;
+    --warn:#a13d2c;
+    --warn-soft:#f6e4de;
+    --gray:#8a8375;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    line-height:1.6;
+  }
+  header{
+    padding:32px clamp(20px,5vw,64px) 20px;
+    border-bottom:2px solid var(--ink);
+  }
+  header h1{
+    margin:0 0 6px;
+    font-size:28px;
+    font-weight:700;
+    letter-spacing:.5px;
+  }
+  header p{
+    margin:0;
+    color:var(--gray);
+    font-size:14px;
+  }
+  main{
+    max-width:1100px;
+    margin:0 auto;
+    padding:28px clamp(20px,5vw,64px) 80px;
+  }
+  .step{
+    border:1px solid var(--line);
+    background:#fff;
+    border-radius:6px;
+    padding:20px 24px;
+    margin-bottom:22px;
+  }
+  .step h2{
+    font-size:16px;
+    margin:0 0 12px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .step h2 .num{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    width:24px;height:24px;
+    border-radius:50%;
+    background:var(--accent);
+    color:#fff;
+    font-size:13px;
+    flex:none;
+  }
+  .drop{
+    border:1.5px dashed var(--line);
+    border-radius:6px;
+    padding:22px;
+    text-align:center;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .drop:hover, .drop.drag{
+    border-color:var(--accent);
+    background:var(--accent-soft);
+  }
+  .drop input{display:none;}
+  .drop .fname{
+    margin-top:8px;
+    font-size:13px;
+    color:var(--accent);
+    font-weight:600;
+    word-break:break-all;
+  }
+  .drop .hint{font-size:13px;color:var(--gray);}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  @media (max-width:700px){.row2{grid-template-columns:1fr;}}
+
+  .options{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:14px;}
+  .options label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+
+  button.primary{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:11px 22px;
+    border-radius:5px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  button.primary:disabled{background:#b7c2b9;cursor:not-allowed;}
+  button.ghost{
+    background:transparent;
+    border:1px solid var(--ink);
+    padding:9px 18px;
+    border-radius:5px;
+    font-size:14px;
+    cursor:pointer;
+  }
+
+  .summary{
+    display:flex;gap:14px;flex-wrap:wrap;margin:16px 0 4px;
+  }
+  .tag{
+    padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;
+  }
+  .tag.ok{background:var(--accent-soft);color:var(--accent);}
+  .tag.warn{background:var(--warn-soft);color:var(--warn);}
+  .tag.neutral{background:#eee;color:#555;}
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:13.5px;
+    margin-top:10px;
+  }
+  thead th{
+    position:sticky;top:0;
+    background:var(--ink);
+    color:#fff;
+    text-align:left;
+    padding:9px 10px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  tbody td{
+    padding:8px 10px;
+    border-bottom:1px solid #ece8de;
+    vertical-align:top;
+  }
+  tbody tr.status-ok{background:#fff;}
+  tbody tr.status-nochange{background:#fbfaf6;color:#8a8375;}
+  tbody tr.status-multi{background:var(--warn-soft);}
+  tbody tr.status-notfound{background:#f2f2f2;}
+  .diff-old{color:var(--warn);text-decoration:line-through;margin-right:6px;font-size:12px;}
+  .diff-new{color:var(--accent);font-weight:700;}
+  select.pick{
+    font-size:12.5px;padding:3px 4px;border-radius:4px;border:1px solid var(--line);
+    max-width:230px;
+  }
+  .badge{
+    display:inline-block;
+    font-size:11px;
+    padding:1px 7px;
+    border-radius:10px;
+    font-weight:700;
+  }
+  .badge.ok{background:var(--accent);color:#fff;}
+  .badge.warn{background:var(--warn);color:#fff;}
+  .badge.neutral{background:var(--gray);color:#fff;}
+  .table-wrap{max-height:560px;overflow:auto;border:1px solid var(--line);border-radius:6px;}
+  .toolbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:8px;}
+  .note{font-size:12.5px;color:var(--gray);margin-top:10px;}
+  .hidden{display:none !important;}
+  .apply-row{display:flex;align-items:center;gap:8px;}
+  input[type=checkbox]{width:16px;height:16px;cursor:pointer;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>因才網名單更新工具</h1>
+  <p>依「全校資料名單」核對並更新舊名單的年級、班級、座號（以姓名比對）</p>
+</header>
+
+<main>
+
+  <div class="step">
+    <h2><span class="num">1</span>上傳兩份 Excel 檔案</h2>
+    <div class="row2">
+      <div class="drop" id="dropOld">
+        <div>📄 舊的因才網名單</div>
+        <div class="hint">欄位需含：學生帳號、學生姓名、年級、班級、座號</div>
+        <div class="fname" id="fnameOld"></div>
+        <input type="file" id="fileOld" accept=".xlsx,.xls,.csv">
+      </div>
+      <div class="drop" id="dropFull">
+        <div>📄 全校資料名單</div>
+        <div class="hint">欄位需含：班級、座號、姓名（等）</div>
+        <div class="fname" id="fnameFull"></div>
+        <input type="file" id="fileFull" accept=".xlsx,.xls,.csv">
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <h2><span class="num">2</span>比對規則設定</h2>
+    <div class="options">
+      <label><input type="checkbox" id="optZeroPad">輸出座號補零（如 1 → 01，維持與全校名單一致）</label>
+      <label><input type="checkbox" id="optTrimSpace" checked>比對姓名時忽略空白</label>
+      <label><input type="checkbox" id="optIgnoreWidth" checked>全形/半形數字視為相同</label>
+    </div>
+    <p class="note">班級代碼規則：以「年級 × 100 ＋ 班級」解析，例如 101 → 1年1班、512 → 5年12班。</p>
+    <div style="margin-top:16px;">
+      <button class="primary" id="btnCompare" disabled>開始比對</button>
+    </div>
+  </div>
+
+  <div class="step hidden" id="resultStep">
+    <h2><span class="num">3</span>比對結果</h2>
+    <div class="summary" id="summaryTags"></div>
+    <div class="toolbar">
+      <div class="apply-row">
+        <label><input type="checkbox" id="checkAllChanges" checked> 全選（套用所有已確認的更新）</label>
+      </div>
+      <div>
+        <button class="ghost" id="btnExport">下載更新後名單 (.xlsx)</button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>套用</th>
+            <th>學生帳號</th>
+            <th>學生姓名</th>
+            <th>狀態</th>
+            <th>年級</th>
+            <th>班級</th>
+            <th>座號</th>
+            <th>備註 / 選擇對應學生</th>
+          </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+      </table>
+    </div>
+    <p class="note">紅色刪除線＝原本的值，綠色粗體＝依全校名單比對出的新值。灰色列＝比對後無需更動。橘色列＝全校名單中有多筆同名，請於最右欄手動選擇正確對象。</p>
+  </div>
+
+</main>
+
+<script>
+let oldRows = null, oldHeaders = null;
+let fullRows = null, fullHeaders = null;
+let compareResults = [];
+
+function normName(s, trim, ignoreWidth){
+  if(s === null || s === undefined) return "";
+  s = String(s);
+  if(ignoreWidth){
+    s = s.replace(/[\uFF10-\uFF19]/g, c => String.fromCharCode(c.charCodeAt(0)-0xFEE0));
+  }
+  if(trim) s = s.replace(/\s+/g,"");
+  return s;
+}
+
+function readWorkbook(file, cb){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const data = new Uint8Array(e.target.result);
+    const wb = XLSX.read(data, {type:"array"});
+    const sheet = wb.Sheets[wb.SheetNames[0]];
+    const json = XLSX.utils.sheet_to_json(sheet, {defval:""});
+    cb(json);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function setupDrop(dropId, inputId, fnameId, onLoaded){
+  const drop = document.getElementById(dropId);
+  const input = document.getElementById(inputId);
+  const fname = document.getElementById(fnameId);
+  drop.addEventListener("click", ()=>input.click());
+  drop.addEventListener("dragover", e=>{e.preventDefault(); drop.classList.add("drag");});
+  drop.addEventListener("dragleave", ()=>drop.classList.remove("drag"));
+  drop.addEventListener("drop", e=>{
+    e.preventDefault(); drop.classList.remove("drag");
+    if(e.dataTransfer.files.length){
+      input.files = e.dataTransfer.files;
+      handleFile(input.files[0]);
+    }
+  });
+  input.addEventListener("change", ()=>{
+    if(input.files.length) handleFile(input.files[0]);
+  });
+  function handleFile(file){
+    fname.textContent = "已選擇：" + file.name;
+    readWorkbook(file, json=>{
+      onLoaded(json);
+      checkReady();
+    });
+  }
+}
+
+function checkReady(){
+  document.getElementById("btnCompare").disabled = !(oldRows && fullRows);
+}
+
+setupDrop("dropOld","fileOld","fnameOld", json=>{
+  oldRows = json;
+  oldHeaders = json.length ? Object.keys(json[0]) : [];
+});
+setupDrop("dropFull","fileFull","fnameFull", json=>{
+  fullRows = json;
+  fullHeaders = json.length ? Object.keys(json[0]) : [];
+});
+
+function findKey(headers, candidates){
+  for(const c of candidates){
+    const hit = headers.find(h => String(h).trim() === c);
+    if(hit) return hit;
+  }
+  // fuzzy contains
+  for(const c of candidates){
+    const hit = headers.find(h => String(h).includes(c));
+    if(hit) return hit;
+  }
+  return null;
+}
+
+function parseClassCode(val){
+  const n = parseInt(String(val).replace(/[^\d]/g,""), 10);
+  if(isNaN(n)) return null;
+  const grade = Math.floor(n/100);
+  const cls = n % 100;
+  if(grade < 1 || grade > 12 || cls < 1) return null;
+  return {grade, cls};
+}
+
+document.getElementById("btnCompare").addEventListener("click", ()=>{
+  runCompare();
+});
+
+function runCompare(){
+  const trim = document.getElementById("optTrimSpace").checked;
+  const ignoreWidth = document.getElementById("optIgnoreWidth").checked;
+
+  const kOldAcc = findKey(oldHeaders, ["學生帳號","帳號"]);
+  const kOldName = findKey(oldHeaders, ["學生姓名","姓名"]);
+  const kOldGrade = findKey(oldHeaders, ["年級"]);
+  const kOldClass = findKey(oldHeaders, ["班級"]);
+  const kOldSeat = findKey(oldHeaders, ["座號"]);
+
+  const kFullClass = findKey(fullHeaders, ["班級"]);
+  const kFullSeat = findKey(fullHeaders, ["座號"]);
+  const kFullName = findKey(fullHeaders, ["姓名"]);
+  const kFullId = findKey(fullHeaders, ["學號"]);
+
+  // build name -> [records] map from full list
+  const nameMap = {};
+  fullRows.forEach(r=>{
+    const nm = normName(r[kFullName], trim, ignoreWidth);
+    if(!nm) return;
+    if(!nameMap[nm]) nameMap[nm] = [];
+    const parsed = parseClassCode(r[kFullClass]);
+    nameMap[nm].push({
+      grade: parsed ? parsed.grade : null,
+      cls: parsed ? parsed.cls : null,
+      seat: r[kFullSeat],
+      id: kFullId ? r[kFullId] : "",
+      rawClass: r[kFullClass],
+      raw: r
+    });
+  });
+
+  compareResults = oldRows.map(row=>{
+    const nm = normName(row[kOldName], trim, ignoreWidth);
+    const matches = nameMap[nm] || [];
+    const base = {
+      account: row[kOldAcc],
+      name: row[kOldName],
+      oldGrade: row[kOldGrade],
+      oldClass: row[kOldClass],
+      oldSeat: row[kOldSeat],
+      rawRow: row
+    };
+    if(matches.length === 0){
+      return {...base, status:"notfound", newGrade:null, newClass:null, newSeat:null, candidates:[]};
+    }
+    if(matches.length === 1){
+      const m = matches[0];
+      const changed = (String(base.oldGrade) !== String(m.grade)) ||
+                       (String(base.oldClass) !== String(m.cls)) ||
+                       (parseInt(base.oldSeat,10) !== parseInt(m.seat,10));
+      return {...base, status: changed ? "ok" : "nochange",
+        newGrade:m.grade, newClass:m.cls, newSeat:m.seat, candidates:matches, chosenIdx:0};
+    }
+    // multiple matches -> need manual pick
+    return {...base, status:"multi", newGrade:matches[0].grade, newClass:matches[0].cls,
+      newSeat:matches[0].seat, candidates:matches, chosenIdx:0};
+  });
+
+  renderResults();
+  document.getElementById("resultStep").classList.remove("hidden");
+  document.getElementById("resultStep").scrollIntoView({behavior:"smooth"});
+}
+
+function padSeat(seat){
+  const zeroPad = document.getElementById("optZeroPad").checked;
+  if(seat === null || seat === undefined || seat === "") return "";
+  const n = parseInt(String(seat).replace(/[^\d]/g,""),10);
+  if(isNaN(n)) return seat;
+  return zeroPad ? String(n).padStart(2,"0") : String(n);
+}
+
+function renderResults(){
+  const tbody = document.getElementById("resultBody");
+  tbody.innerHTML = "";
+
+  let cOk=0, cNochange=0, cMulti=0, cNotfound=0;
+
+  compareResults.forEach((r, idx)=>{
+    const tr = document.createElement("tr");
+    tr.className = "status-"+r.status;
+
+    // checkbox
+    const tdCheck = document.createElement("td");
+    if(r.status === "ok"){
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = true;
+      cb.dataset.idx = idx;
+      cb.className = "apply-cb";
+      tdCheck.appendChild(cb);
+    }
+    tr.appendChild(tdCheck);
+
+    const tdAcc = document.createElement("td"); tdAcc.textContent = r.account; tr.appendChild(tdAcc);
+    const tdName = document.createElement("td"); tdName.textContent = r.name; tr.appendChild(tdName);
+
+    const tdStatus = document.createElement("td");
+    if(r.status==="ok"){ tdStatus.innerHTML='<span class="badge ok">已比對，可更新</span>'; cOk++; }
+    else if(r.status==="nochange"){ tdStatus.innerHTML='<span class="badge neutral">無需更動</span>'; cNochange++; }
+    else if(r.status==="multi"){ tdStatus.innerHTML='<span class="badge warn">同名多筆</span>'; cMulti++; }
+    else { tdStatus.innerHTML='<span class="badge warn">全校名單查無此姓名</span>'; cNotfound++; }
+    tr.appendChild(tdStatus);
+
+    function diffCell(oldVal, newVal){
+      const td = document.createElement("td");
+      if(newVal === null || newVal === undefined || newVal === ""){
+        td.textContent = oldVal;
+        return td;
+      }
+      if(String(oldVal) === String(newVal)){
+        td.textContent = oldVal;
+      } else {
+        td.innerHTML = `<span class="diff-old">${oldVal}</span><span class="diff-new">${newVal}</span>`;
+      }
+      return td;
+    }
+
+    tr.appendChild(diffCell(r.oldGrade, r.newGrade));
+    tr.appendChild(diffCell(r.oldClass, r.newClass));
+    tr.appendChild(diffCell(padSeat(r.oldSeat), padSeat(r.newSeat)));
+
+    const tdNote = document.createElement("td");
+    if(r.status === "multi"){
+      const sel = document.createElement("select");
+      sel.className = "pick";
+      r.candidates.forEach((c,ci)=>{
+        const opt = document.createElement("option");
+        opt.value = ci;
+        opt.textContent = `${c.grade}年${c.cls}班 座號${padSeat(c.seat)} 學號${c.id}`;
+        sel.appendChild(opt);
+      });
+      sel.addEventListener("change", ()=>{
+        const chosen = r.candidates[sel.value];
+        r.newGrade = chosen.grade; r.newClass = chosen.cls; r.newSeat = chosen.seat;
+        r.chosenIdx = sel.value;
+        renderResults();
+      });
+      tdNote.appendChild(sel);
+    } else if(r.status === "notfound"){
+      tdNote.textContent = "請人工確認姓名或手動修正";
+    }
+    tr.appendChild(tdNote);
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("summaryTags").innerHTML = `
+    <span class="tag ok">可更新：${cOk}</span>
+    <span class="tag neutral">無需更動：${cNochange}</span>
+    <span class="tag warn">同名多筆：${cMulti}</span>
+    <span class="tag warn">查無姓名：${cNotfound}</span>
+  `;
+}
+
+document.getElementById("checkAllChanges").addEventListener("change", (e)=>{
+  document.querySelectorAll(".apply-cb").forEach(cb=>cb.checked = e.target.checked);
+});
+
+document.getElementById("btnExport").addEventListener("click", ()=>{
+  const kOldAcc = findKey(oldHeaders, ["學生帳號","帳號"]);
+  const kOldName = findKey(oldHeaders, ["學生姓名","姓名"]);
+  const kOldGrade = findKey(oldHeaders, ["年級"]);
+  const kOldClass = findKey(oldHeaders, ["班級"]);
+  const kOldSeat = findKey(oldHeaders, ["座號"]);
+
+  const checkboxes = document.querySelectorAll(".apply-cb");
+  const applyMap = {};
+  checkboxes.forEach(cb=>{ applyMap[cb.dataset.idx] = cb.checked; });
+
+  const outRows = compareResults.map((r, idx)=>{
+    const row = {...r.rawRow};
+    const shouldApply = (r.status === "ok" && applyMap[idx]) ||
+                         (r.status === "multi"); // multi already manually chosen, apply chosen value
+    if(shouldApply && r.newGrade !== null){
+      row[kOldGrade] = r.newGrade;
+      row[kOldClass] = r.newClass;
+      row[kOldSeat] = parseInt(padSeat(r.newSeat),10) || padSeat(r.newSeat);
+      // keep zero-pad string if selected
+      row[kOldSeat] = padSeat(r.newSeat);
+    }
+    return row;
+  });
+
+  const ws = XLSX.utils.json_to_sheet(outRows, {header: oldHeaders});
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "更新後名單");
+  XLSX.writeFile(wb, "因才網名單_更新後.xlsx");
+});
+</script>
+
+</body>
+</html>
