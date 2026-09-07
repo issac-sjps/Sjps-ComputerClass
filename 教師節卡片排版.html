@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>卡片排版列印工具</title>
+<style>
+  :root{
+    --ink:#2b2622;
+    --paper:#faf7f2;
+    --line:#d8cfc2;
+    --accent:#7a5c3e;
+    --accent2:#c8763e;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    margin:0;
+    padding:28px 20px 80px;
+  }
+  h1{
+    font-size:22px;
+    margin:0 0 4px;
+    letter-spacing:.02em;
+  }
+  .sub{
+    color:#7a6e60;
+    font-size:14px;
+    margin-bottom:22px;
+  }
+  .panel{
+    background:#fff;
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+    max-width:920px;
+    margin:0 auto 18px;
+  }
+  .panel h2{
+    font-size:15px;
+    margin:0 0 10px;
+    color:var(--accent);
+  }
+  .drop{
+    border:2px dashed var(--line);
+    border-radius:8px;
+    padding:26px;
+    text-align:center;
+    color:#8a7d6c;
+    cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .drop:hover, .drop.drag{
+    border-color:var(--accent2);
+    background:#fff8f2;
+  }
+  .drop input{display:none;}
+  .hint{font-size:12.5px; color:#9a8d7c; margin-top:8px; line-height:1.6;}
+  .row{display:flex; gap:14px; flex-wrap:wrap; align-items:center;}
+  .toolbar{display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-top:14px;}
+  button{
+    font-family:inherit;
+    font-size:13.5px;
+    border:1px solid var(--accent);
+    background:var(--accent);
+    color:#fff;
+    padding:8px 16px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  button.ghost{
+    background:#fff;
+    color:var(--accent);
+  }
+  button:disabled{opacity:.4; cursor:not-allowed;}
+  label.chk{font-size:13px; display:flex; align-items:center; gap:6px; color:#5c5347;}
+  .cols{display:flex; gap:24px; margin-top:16px; flex-wrap:wrap;}
+  .col{flex:1; min-width:260px;}
+  .col h3{
+    font-size:13px;
+    text-transform:none;
+    color:var(--accent2);
+    border-bottom:1px solid var(--line);
+    padding-bottom:6px;
+    margin-bottom:8px;
+  }
+  .thumb-list{display:flex; flex-direction:column; gap:6px; min-height:20px;}
+  .thumb{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fdfbf8;
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:6px 8px;
+    cursor:grab;
+  }
+  .thumb.dragging{opacity:.4;}
+  .thumb img{
+    width:48px; height:30px; object-fit:cover; border-radius:3px; border:1px solid var(--line);
+  }
+  .thumb .meta{flex:1; font-size:12.5px; color:#5c5347;}
+  .thumb .num{
+    font-weight:600; color:var(--ink); font-size:13px;
+  }
+  .thumb select, .thumb input[type=text]{
+    font-size:12px; border:1px solid var(--line); border-radius:4px; padding:2px 4px; width:64px;
+  }
+  .thumb .del{
+    cursor:pointer; color:#b3564a; font-size:12px; border:none; background:none; padding:2px 6px;
+  }
+  .empty-note{font-size:12.5px; color:#a89c8b; padding:8px 0;}
+
+  /* ---- print sheet preview & print ---- */
+  #sheets{
+    max-width:920px;
+    margin:24px auto 0;
+  }
+  .sheet-label{
+    font-size:12.5px; color:#8a7d6c; margin:18px 0 6px; text-align:center;
+  }
+  .sheet{
+    background:#fff;
+    margin:0 auto 10px;
+    box-shadow:0 2px 10px rgba(0,0,0,.12);
+    display:grid;
+    grid-template-columns:repeat(var(--cols), 8.55cm);
+    grid-template-rows:repeat(var(--rows), 5.4cm);
+    justify-content:center;
+    align-content:center;
+    transform-origin:top center;
+  }
+  .card-slot{
+    width:8.55cm;
+    height:5.4cm;
+    overflow:hidden;
+    position:relative;
+  }
+  .cut-guide .card-slot{
+    outline:1px dashed #b7aa96;
+    outline-offset:-1px;
+  }
+  .card-slot img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
+  .card-slot .placeholder{
+    width:100%; height:100%;
+    display:flex; align-items:center; justify-content:center;
+    color:#cfc4b3; font-size:11px;
+  }
+
+  @media print{
+    body *{ visibility:hidden; }
+    #sheets, #sheets *{ visibility:visible; }
+    #sheets{ margin:0; max-width:none; }
+    .sheet{ box-shadow:none; margin:0; page-break-after:always; }
+  }
+  @page{ margin:0; }
+  .page-a3{ width:29.7cm; height:42cm; }
+  .page-a3 { }
+  
+</style>
+</head>
+<body>
+
+  <h1>卡片排版列印工具</h1>
+  <div class="sub">上傳卡片圖片 → 依卡號自動分男女、排序 → 排成 A3 正面(男生)／反面(女生),直接列印或存 PDF。</div>
+
+  <div class="panel no-print">
+    <h2>1. 上傳卡片</h2>
+    <div class="drop" id="drop">
+      <div>將圖片拖曳到這裡,或點擊選擇檔案(最多 29 張)</div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+    </div>
+    <div class="hint">
+      建議檔名包含 5 碼卡號,例如 <b>50113.jpg</b>:程式會自動判斷「01–19 為男生、20–35 為女生」並依號碼排序。<br>
+      若檔名沒有卡號,該張卡會先放進「未分類」,你可以手動選男生/女生並輸入號碼,或直接拖曳調整順序。
+    </div>
+  </div>
+
+  <div class="panel no-print" id="listPanel" style="display:none;">
+    <h2>2. 確認名單與順序(可拖曳調整、可修改號碼/性別)</h2>
+    <div class="cols">
+      <div class="col">
+        <h3>男生(50101–50119)</h3>
+        <div class="thumb-list" id="listMale"></div>
+      </div>
+      <div class="col">
+        <h3>女生(50120–50135)</h3>
+        <div class="thumb-list" id="listFemale"></div>
+      </div>
+      <div class="col">
+        <h3>未分類 / 待確認</h3>
+        <div class="thumb-list" id="listUnsorted"></div>
+        <div class="empty-note" id="unsortedEmpty">目前沒有未分類卡片</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel no-print" id="genPanel" style="display:none;">
+    <h2>3. 產生版面</h2>
+    <div class="toolbar">
+      <label class="chk">紙張大小:
+        <select id="paperSize">
+          <option value="B4">B4(18格/面,較省紙)</option>
+          <option value="A3">A3(21格/面)</option>
+          <option value="A4">A4(10格/面,單班人少可用)</option>
+        </select>
+      </label>
+      <button id="genBtn">產生排版(正:男生／反:女生)</button>
+      <label class="chk"><input type="checkbox" id="cutGuide" checked> 顯示裁切輔助線(僅螢幕/列印參考,不影響護貝)</label>
+      <button class="ghost" id="printBtn" disabled>列印 / 存成 PDF</button>
+    </div>
+    <div class="hint" id="paperHint">列印時請在印表機設定選擇對應紙張、無邊界(或最小邊界)、實際大小(不要縮放)。護貝建議買同尺寸護貝膜,一張紙正反面護貝完即為完整一套。</div>
+  </div>
+
+  <div id="sheets"></div>
+
+<script>
+const state = { cards: [] }; // {id, url, file, gender:'M'|'F'|null, number:int|null}
+let dragId = null;
+
+const drop = document.getElementById('drop');
+const fileInput = document.getElementById('fileInput');
+
+['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev, e=>{
+  e.preventDefault(); drop.classList.add('drag');
+}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev, e=>{
+  e.preventDefault(); drop.classList.remove('drag');
+}));
+drop.addEventListener('drop', e=>{
+  handleFiles(e.dataTransfer.files);
+});
+drop.addEventListener('click', ()=>fileInput.click());
+fileInput.addEventListener('change', e=>handleFiles(e.target.files));
+
+function parseNumberFromName(name){
+  const m = name.match(/(\d{5})/);
+  if(!m) return null;
+  const num = parseInt(m[1],10);
+  if(num < 50101 || num > 50199) return null;
+  return num;
+}
+function genderFromNumber(num){
+  const seq = num - 50100;
+  if(seq>=1 && seq<=19) return 'M';
+  if(seq>=20 && seq<=35) return 'F';
+  return null;
+}
+
+function handleFiles(fileList){
+  const files = Array.from(fileList).slice(0, 29 - state.cards.length);
+  files.forEach(file=>{
+    if(!file.type.startsWith('image/')) return;
+    const url = URL.createObjectURL(file);
+    const num = parseNumberFromName(file.name);
+    const gender = num ? genderFromNumber(num) : null;
+    state.cards.push({
+      id: crypto.randomUUID(),
+      url, file, number:num, gender
+    });
+  });
+  render();
+}
+
+function render(){
+  document.getElementById('listPanel').style.display = state.cards.length ? 'block':'none';
+  document.getElementById('genPanel').style.display = state.cards.length ? 'block':'none';
+
+  const male = state.cards.filter(c=>c.gender==='M').sort((a,b)=>a.number-b.number);
+  const female = state.cards.filter(c=>c.gender==='F').sort((a,b)=>a.number-b.number);
+  const unsorted = state.cards.filter(c=>!c.gender);
+
+  renderList('listMale', male, 'M');
+  renderList('listFemale', female, 'F');
+  renderList('listUnsorted', unsorted, null);
+  document.getElementById('unsortedEmpty').style.display = unsorted.length? 'none':'block';
+}
+
+function renderList(containerId, cards, fixedGender){
+  const el = document.getElementById(containerId);
+  el.innerHTML = '';
+  cards.forEach(c=>{
+    const row = document.createElement('div');
+    row.className = 'thumb';
+    row.draggable = true;
+    row.dataset.id = c.id;
+
+    row.addEventListener('dragstart', ()=>{ dragId=c.id; row.classList.add('dragging'); });
+    row.addEventListener('dragend', ()=>{ row.classList.remove('dragging'); });
+    row.addEventListener('dragover', e=>e.preventDefault());
+    row.addEventListener('drop', e=>{
+      e.preventDefault();
+      if(dragId && dragId!==c.id) reorder(dragId, c.id);
+    });
+
+    const img = document.createElement('img');
+    img.src = c.url;
+    row.appendChild(img);
+
+    const meta = document.createElement('div');
+    meta.className='meta';
+    meta.innerHTML = `<span class="num">${c.number || '未編號'}</span>`;
+    row.appendChild(meta);
+
+    const genderSel = document.createElement('select');
+    ['','M','F'].forEach(g=>{
+      const opt = document.createElement('option');
+      opt.value=g; opt.textContent = g==='M'?'男生':g==='F'?'女生':'—';
+      if(c.gender===g || (!c.gender && g==='')) opt.selected=true;
+      genderSel.appendChild(opt);
+    });
+    genderSel.addEventListener('change', ()=>{
+      c.gender = genderSel.value || null;
+      render();
+    });
+    row.appendChild(genderSel);
+
+    const numInput = document.createElement('input');
+    numInput.type='text';
+    numInput.placeholder='號碼';
+    numInput.value = c.number || '';
+    numInput.addEventListener('change', ()=>{
+      const v = parseInt(numInput.value,10);
+      c.number = isNaN(v)? null : v;
+      if(c.number && !c.gender){
+        const g = genderFromNumber(c.number);
+        if(g) c.gender = g;
+      }
+      render();
+    });
+    row.appendChild(numInput);
+
+    const del = document.createElement('button');
+    del.className='del'; del.textContent='移除';
+    del.addEventListener('click', ()=>{
+      state.cards = state.cards.filter(x=>x.id!==c.id);
+      render();
+    });
+    row.appendChild(del);
+
+    el.appendChild(row);
+  });
+}
+
+function reorder(draggedId, targetId){
+  const dragged = state.cards.find(c=>c.id===draggedId);
+  const target = state.cards.find(c=>c.id===targetId);
+  if(!dragged || !target) return;
+  // give dragged a number that places it just before target within same list
+  if(dragged.gender === target.gender){
+    const list = state.cards.filter(c=>c.gender===target.gender).sort((a,b)=>(a.number||999)-(b.number||999));
+    const idx = list.indexOf(target);
+    list.splice(list.indexOf(dragged),1);
+    list.splice(idx,0,dragged);
+    list.forEach((c,i)=>{ c._order = i; });
+    // reassign sequential numbers within same gender to preserve manual order visually
+    list.forEach((c,i)=>{ /* keep original numbers, just reorder display via _order */ });
+    // simplest: sort by _order for rendering by overriding number sort key
+    list.forEach((c,i)=>{ c.__manualOrder = i; });
+    state.cards.forEach(c=>{
+      const found = list.find(x=>x.id===c.id);
+      if(found) c.__manualOrder = found.__manualOrder;
+    });
+  }
+  render();
+}
+
+document.getElementById('genBtn').addEventListener('click', generateSheets);
+document.getElementById('cutGuide').addEventListener('change', generateSheets);
+document.getElementById('printBtn').addEventListener('click', ()=>window.print());
+
+function sortForPrint(cards){
+  return cards.slice().sort((a,b)=>{
+    const ao = a.__manualOrder, bo = b.__manualOrder;
+    if(ao!==undefined && bo!==undefined) return ao-bo;
+    return (a.number||9999)-(b.number||9999);
+  });
+}
+
+const PAPER = {
+  B4: { w:25.7, h:36.4, cols:3, rows:6 },
+  A3: { w:29.7, h:42,   cols:3, rows:7 },
+  A4: { w:21,   h:29.7, cols:2, rows:5 }
+};
+
+function setPageStyle(paperKey){
+  const p = PAPER[paperKey];
+  let styleEl = document.getElementById('dynPageStyle');
+  if(!styleEl){
+    styleEl = document.createElement('style');
+    styleEl.id = 'dynPageStyle';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = `
+    @media print { @page { size: ${p.w}cm ${p.h}cm; margin:0; } }
+  `;
+}
+
+function generateSheets(){
+  const paperKey = document.getElementById('paperSize').value;
+  const p = PAPER[paperKey];
+  const capacity = p.cols * p.rows;
+  setPageStyle(paperKey);
+
+  const male = sortForPrint(state.cards.filter(c=>c.gender==='M'));
+  const female = sortForPrint(state.cards.filter(c=>c.gender==='F'));
+  const cutGuide = document.getElementById('cutGuide').checked;
+
+  const sheetsEl = document.getElementById('sheets');
+  sheetsEl.innerHTML = '';
+
+  const warn = [];
+  if(male.length > capacity) warn.push(`男生 ${male.length} 人超過 ${paperKey} 單面容量(${capacity}格),男生會分成多面`);
+  if(female.length > capacity) warn.push(`女生 ${female.length} 人超過 ${paperKey} 單面容量(${capacity}格),女生會分成多面`);
+  if(warn.length){
+    const w = document.createElement('div');
+    w.className='hint no-print';
+    w.style.color = '#b3564a';
+    w.textContent = '⚠ ' + warn.join('；') + '。可改選較大紙張(A3)或分批列印。';
+    sheetsEl.appendChild(w);
+  }
+
+  chunk(male, capacity).forEach((group,i)=>{
+    sheetsEl.appendChild(makeLabel(`${paperKey} 正面 — 男生${chunk(male,capacity).length>1? ` (第${i+1}張)`:''}`));
+    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity));
+  });
+  chunk(female, capacity).forEach((group,i)=>{
+    sheetsEl.appendChild(makeLabel(`${paperKey} 反面 — 女生${chunk(female,capacity).length>1? ` (第${i+1}張)`:''}`));
+    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity));
+  });
+
+  document.getElementById('printBtn').disabled = (male.length===0 && female.length===0);
+  sheetsEl.scrollIntoView({behavior:'smooth'});
+}
+
+function chunk(arr, size){
+  if(arr.length===0) return [[]];
+  const out=[];
+  for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));
+  return out;
+}
+
+function makeLabel(text){
+  const d = document.createElement('div');
+  d.className='sheet-label no-print';
+  d.textContent = text;
+  return d;
+}
+
+function makeSheet(cards, cutGuide, p, capacity){
+  const sheet = document.createElement('div');
+  sheet.className = 'sheet' + (cutGuide? ' cut-guide':'');
+  sheet.style.setProperty('--cols', p.cols);
+  sheet.style.setProperty('--rows', p.rows);
+  sheet.style.width = p.w + 'cm';
+  sheet.style.height = p.h + 'cm';
+  for(let i=0;i<capacity;i++){
+    const slot = document.createElement('div');
+    slot.className='card-slot';
+    if(cards[i]){
+      const img = document.createElement('img');
+      img.src = cards[i].url;
+      slot.appendChild(img);
+    } else {
+      const ph = document.createElement('div');
+      ph.className='placeholder';
+      slot.appendChild(ph);
+    }
+    sheet.appendChild(slot);
+  }
+  return sheet;
+}
+</script>
+</body>
+</html>
