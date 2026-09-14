@@ -183,11 +183,11 @@
     <h2>2. 確認名單與順序(可拖曳調整、可修改號碼/性別)</h2>
     <div class="cols">
       <div class="col">
-        <h3>男生(50101–50119)</h3>
+        <h3>男生(座號01–19)</h3>
         <div class="thumb-list" id="listMale"></div>
       </div>
       <div class="col">
-        <h3>女生(50120–50135)</h3>
+        <h3>女生(座號20–35)</h3>
         <div class="thumb-list" id="listFemale"></div>
       </div>
       <div class="col">
@@ -240,11 +240,10 @@ function parseNumberFromName(name){
   const m = name.match(/(\d{5})/);
   if(!m) return null;
   const num = parseInt(m[1],10);
-  if(num < 50101 || num > 50199) return null;
   return num;
 }
 function genderFromNumber(num){
-  const seq = num - 50100;
+  const seq = num % 100; // 取後兩碼當座號，不論班級碼(501/502/507...)
   if(seq>=1 && seq<=19) return 'M';
   if(seq>=20 && seq<=35) return 'F';
   return null;
