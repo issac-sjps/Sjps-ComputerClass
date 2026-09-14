@@ -124,12 +124,27 @@
     background:#fff;
     margin:0 auto 10px;
     box-shadow:0 2px 10px rgba(0,0,0,.12);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    transform-origin:top center;
+  }
+  .sheet-title{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:700;
+    color:var(--ink);
+    letter-spacing:.06em;
+    flex:0 0 auto;
+  }
+  .sheet-grid{
     display:grid;
     grid-template-columns:repeat(var(--cols), 8.55cm);
     grid-template-rows:repeat(var(--rows), 5.4cm);
     justify-content:center;
     align-content:center;
-    transform-origin:top center;
   }
   .card-slot{
     width:8.55cm;
@@ -155,6 +170,8 @@
     #sheets, #sheets *{ visibility:visible; }
     #sheets{ margin:0; max-width:none; }
     .sheet{ box-shadow:none; margin:0; page-break-after:always; }
+    .sheet:last-child{ page-break-after:auto; }
+    .no-print{ display:none !important; }
   }
   @page{ margin:0; }
   .page-a3{ width:29.7cm; height:42cm; }
@@ -203,16 +220,26 @@
     <div class="toolbar">
       <label class="chk">紙張大小:
         <select id="paperSize">
-          <option value="B4">B4(18格/面,較省紙)</option>
-          <option value="A3">A3(21格/面)</option>
-          <option value="A4">A4(10格/面,單班人少可用)</option>
+          <option value="B4">B4(直式18格/面)</option>
+          <option value="A3">A3(直式21格/面)</option>
+          <option value="A4">A4(直式10格/面)</option>
         </select>
+      </label>
+      <label class="chk">列印方向:
+        <select id="orientation">
+          <option value="portrait">直式</option>
+          <option value="landscape">橫式</option>
+        </select>
+      </label>
+      <label class="chk" style="align-items:flex-start; flex-direction:column; gap:4px;">
+        標題文字(可留空不顯示):
+        <input type="text" id="titleText" value="115教師節快樂" style="padding:5px 8px; border:1px solid var(--line); border-radius:4px; font-size:13px; width:200px;">
       </label>
       <button id="genBtn">產生排版(正:男生／反:女生)</button>
       <label class="chk"><input type="checkbox" id="cutGuide" checked> 顯示裁切輔助線(僅螢幕/列印參考,不影響護貝)</label>
       <button class="ghost" id="printBtn" disabled>列印 / 存成 PDF</button>
     </div>
-    <div class="hint" id="paperHint">列印時請在印表機設定選擇對應紙張、無邊界(或最小邊界)、實際大小(不要縮放)。護貝建議買同尺寸護貝膜,一張紙正反面護貝完即為完整一套。</div>
+    <div class="hint" id="paperHint">列印時請在印表機設定選擇對應紙張、無邊界(或最小邊界)、實際大小(不要縮放)。護貝建議買同尺寸護貝膜,一張紙正反面護貝完即為完整一套。每面格數會依「紙張大小 × 方向」自動計算。</div>
   </div>
 
   <div id="sheets"></div>
@@ -369,6 +396,8 @@ function reorder(draggedId, targetId){
 
 document.getElementById('genBtn').addEventListener('click', generateSheets);
 document.getElementById('cutGuide').addEventListener('change', generateSheets);
+document.getElementById('orientation').addEventListener('change', generateSheets);
+document.getElementById('titleText').addEventListener('input', ()=>{ if(state.cards.length) generateSheets(); });
 document.getElementById('printBtn').addEventListener('click', ()=>window.print());
 
 function sortForPrint(cards){
@@ -379,14 +408,27 @@ function sortForPrint(cards){
   });
 }
 
-const PAPER = {
-  B4: { w:25.7, h:36.4, cols:3, rows:6 },
-  A3: { w:29.7, h:42,   cols:3, rows:7 },
-  A4: { w:21,   h:29.7, cols:2, rows:5 }
+const CARD_W = 8.55, CARD_H = 5.4;
+const TITLE_H = 1.1; // cm，標題列高度（有填標題時才會保留）
+
+// 直式基準尺寸(cm)。橫式時將寬高互換。
+const PAPER_BASE = {
+  B4: { w:25.7, h:36.4 },
+  A3: { w:29.7, h:42 },
+  A4: { w:21,   h:29.7 }
 };
 
-function setPageStyle(paperKey){
-  const p = PAPER[paperKey];
+function getPaperConfig(paperKey, orientation, hasTitle){
+  const base = PAPER_BASE[paperKey];
+  let w = orientation==='landscape' ? base.h : base.w;
+  let h = orientation==='landscape' ? base.w : base.h;
+  const titleH = hasTitle ? TITLE_H : 0;
+  const cols = Math.floor(w / CARD_W);
+  const rows = Math.floor((h - titleH) / CARD_H);
+  return { w, h, cols, rows, titleH, capacity: cols*rows };
+}
+
+function setPageStyle(w, h){
   let styleEl = document.getElementById('dynPageStyle');
   if(!styleEl){
     styleEl = document.createElement('style');
@@ -394,15 +436,18 @@ function setPageStyle(paperKey){
     document.head.appendChild(styleEl);
   }
   styleEl.textContent = `
-    @media print { @page { size: ${p.w}cm ${p.h}cm; margin:0; } }
+    @media print { @page { size: ${w}cm ${h}cm; margin:0; } }
   `;
 }
 
 function generateSheets(){
   const paperKey = document.getElementById('paperSize').value;
-  const p = PAPER[paperKey];
-  const capacity = p.cols * p.rows;
-  setPageStyle(paperKey);
+  const orientation = document.getElementById('orientation').value;
+  const titleText = document.getElementById('titleText').value.trim();
+  const hasTitle = titleText.length > 0;
+  const p = getPaperConfig(paperKey, orientation, hasTitle);
+  const capacity = p.capacity;
+  setPageStyle(p.w, p.h);
 
   const male = sortForPrint(state.cards.filter(c=>c.gender==='M'));
   const female = sortForPrint(state.cards.filter(c=>c.gender==='F'));
@@ -411,24 +456,28 @@ function generateSheets(){
   const sheetsEl = document.getElementById('sheets');
   sheetsEl.innerHTML = '';
 
+  const orientLabel = orientation==='landscape' ? '橫式' : '直式';
   const warn = [];
-  if(male.length > capacity) warn.push(`男生 ${male.length} 人超過 ${paperKey} 單面容量(${capacity}格),男生會分成多面`);
-  if(female.length > capacity) warn.push(`女生 ${female.length} 人超過 ${paperKey} 單面容量(${capacity}格),女生會分成多面`);
+  if(male.length > capacity) warn.push(`男生 ${male.length} 人超過 ${paperKey}${orientLabel} 單面容量(${capacity}格),男生會分成多面`);
+  if(female.length > capacity) warn.push(`女生 ${female.length} 人超過 ${paperKey}${orientLabel} 單面容量(${capacity}格),女生會分成多面`);
   if(warn.length){
     const w = document.createElement('div');
     w.className='hint no-print';
     w.style.color = '#b3564a';
-    w.textContent = '⚠ ' + warn.join('；') + '。可改選較大紙張(A3)或分批列印。';
+    w.textContent = '⚠ ' + warn.join('；') + '。可改選較大紙張或方向,或分批列印。';
     sheetsEl.appendChild(w);
   }
 
-  chunk(male, capacity).forEach((group,i)=>{
-    sheetsEl.appendChild(makeLabel(`${paperKey} 正面 — 男生${chunk(male,capacity).length>1? ` (第${i+1}張)`:''}`));
-    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity));
+  const maleChunks = chunk(male, capacity);
+  const femaleChunks = chunk(female, capacity);
+
+  maleChunks.forEach((group,i)=>{
+    sheetsEl.appendChild(makeLabel(`${paperKey}${orientLabel} 正面 — 男生${maleChunks.length>1? ` (第${i+1}張)`:''}`));
+    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity, titleText, hasTitle));
   });
-  chunk(female, capacity).forEach((group,i)=>{
-    sheetsEl.appendChild(makeLabel(`${paperKey} 反面 — 女生${chunk(female,capacity).length>1? ` (第${i+1}張)`:''}`));
-    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity));
+  femaleChunks.forEach((group,i)=>{
+    sheetsEl.appendChild(makeLabel(`${paperKey}${orientLabel} 反面 — 女生${femaleChunks.length>1? ` (第${i+1}張)`:''}`));
+    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity, titleText, hasTitle));
   });
 
   document.getElementById('printBtn').disabled = (male.length===0 && female.length===0);
@@ -436,7 +485,7 @@ function generateSheets(){
 }
 
 function chunk(arr, size){
-  if(arr.length===0) return [[]];
+  if(arr.length===0) return [];
   const out=[];
   for(let i=0;i<arr.length;i+=size) out.push(arr.slice(i,i+size));
   return out;
@@ -449,13 +498,25 @@ function makeLabel(text){
   return d;
 }
 
-function makeSheet(cards, cutGuide, p, capacity){
+function makeSheet(cards, cutGuide, p, capacity, titleText, hasTitle){
   const sheet = document.createElement('div');
-  sheet.className = 'sheet' + (cutGuide? ' cut-guide':'');
-  sheet.style.setProperty('--cols', p.cols);
-  sheet.style.setProperty('--rows', p.rows);
+  sheet.className = 'sheet';
   sheet.style.width = p.w + 'cm';
   sheet.style.height = p.h + 'cm';
+
+  if(hasTitle){
+    const titleEl = document.createElement('div');
+    titleEl.className = 'sheet-title';
+    titleEl.style.height = p.titleH + 'cm';
+    titleEl.style.fontSize = '22px';
+    titleEl.textContent = titleText;
+    sheet.appendChild(titleEl);
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'sheet-grid' + (cutGuide? ' cut-guide':'');
+  grid.style.setProperty('--cols', p.cols);
+  grid.style.setProperty('--rows', p.rows);
   for(let i=0;i<capacity;i++){
     const slot = document.createElement('div');
     slot.className='card-slot';
@@ -468,8 +529,9 @@ function makeSheet(cards, cutGuide, p, capacity){
       ph.className='placeholder';
       slot.appendChild(ph);
     }
-    sheet.appendChild(slot);
+    grid.appendChild(slot);
   }
+  sheet.appendChild(grid);
   return sheet;
 }
 </script>
