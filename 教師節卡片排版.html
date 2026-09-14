@@ -11,7 +11,7 @@
     --accent:#7a5c3e;
     --accent2:#c8763e;
   }
-  *{box-sizing:border-box;}
+  *{box-sizing:border-box; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
   body{
     font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;
     background:var(--paper);
@@ -134,10 +134,22 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    font-weight:700;
-    color:var(--ink);
-    letter-spacing:.06em;
+    font-family:"Noto Serif TC","PingFang TC","Microsoft JhengHei",serif;
+    font-weight:900;
+    letter-spacing:.12em;
     flex:0 0 auto;
+    background:linear-gradient(90deg,#c8763e,#a6432f 45%,#7a5c3e 90%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 1px 0 rgba(255,255,255,.35);
+  }
+  .card-slot.gapped{
+    padding:0.12cm;
+    background:#fff;
+  }
+  .card-slot.gapped img{
+    border-radius:4px;
   }
   .sheet-grid{
     display:grid;
@@ -159,6 +171,10 @@
   .card-slot img{
     width:100%; height:100%; object-fit:cover; display:block;
   }
+  .card-border .card-slot img{
+    outline:0.5pt solid #c9bfae;
+    outline-offset:-0.5pt;
+  }
   .card-slot .placeholder{
     width:100%; height:100%;
     display:flex; align-items:center; justify-content:center;
@@ -172,8 +188,9 @@
     .sheet{ box-shadow:none; margin:0; page-break-after:always; }
     .sheet:last-child{ page-break-after:auto; }
     .no-print{ display:none !important; }
+    body{ padding:0 !important; margin:0 !important; }
   }
-  @page{ margin:0; }
+  @page{ margin:0.5mm; }
   .page-a3{ width:29.7cm; height:42cm; }
   .page-a3 { }
   
@@ -181,8 +198,8 @@
 </head>
 <body>
 
-  <h1>卡片排版列印工具</h1>
-  <div class="sub">上傳卡片圖片 → 依卡號自動分男女、排序 → 排成 A3 正面(男生)／反面(女生),直接列印或存 PDF。</div>
+  <h1 class="no-print">卡片排版列印工具</h1>
+  <div class="sub no-print">上傳卡片圖片 → 依卡號自動分男女、排序 → 排成 A3 正面(男生)／反面(女生),直接列印或存 PDF。</div>
 
   <div class="panel no-print">
     <h2>1. 上傳卡片</h2>
@@ -235,11 +252,21 @@
         標題文字(可留空不顯示):
         <input type="text" id="titleText" value="115教師節快樂" style="padding:5px 8px; border:1px solid var(--line); border-radius:4px; font-size:13px; width:200px;">
       </label>
+      <label class="chk">卡片間距:
+        <select id="cardGap">
+          <option value="none">無間距(滿版)</option>
+          <option value="gap">留白邊(拼貼感)</option>
+        </select>
+      </label>
       <button id="genBtn">產生排版(正:男生／反:女生)</button>
-      <label class="chk"><input type="checkbox" id="cutGuide" checked> 顯示裁切輔助線(僅螢幕/列印參考,不影響護貝)</label>
+      <label class="chk"><input type="checkbox" id="cutGuide"> 顯示裁切輔助線(僅螢幕/列印參考)</label>
+      <label class="chk"><input type="checkbox" id="cardBorder"> 每張卡片加細邊框</label>
       <button class="ghost" id="printBtn" disabled>列印 / 存成 PDF</button>
     </div>
-    <div class="hint" id="paperHint">列印時請在印表機設定選擇對應紙張、無邊界(或最小邊界)、實際大小(不要縮放)。護貝建議買同尺寸護貝膜,一張紙正反面護貝完即為完整一套。每面格數會依「紙張大小 × 方向」自動計算。</div>
+    <div class="hint" id="paperHint">
+      列印時請在印表機設定選擇對應紙張、無邊界(或最小邊界)、實際大小(不要縮放)。<br>
+      <b>雙面列印:</b>請在列印設定開啟「雙面列印」,頁面已依「男生第1頁／女生第1頁／男生第2頁／女生第2頁…」順序交錯排列,直接雙面印即可正面男生、反面女生對齊,不需要手動分兩次印。
+    </div>
   </div>
 
   <div id="sheets"></div>
@@ -396,6 +423,8 @@ function reorder(draggedId, targetId){
 
 document.getElementById('genBtn').addEventListener('click', generateSheets);
 document.getElementById('cutGuide').addEventListener('change', generateSheets);
+document.getElementById('cardBorder').addEventListener('change', generateSheets);
+document.getElementById('cardGap').addEventListener('change', generateSheets);
 document.getElementById('orientation').addEventListener('change', generateSheets);
 document.getElementById('titleText').addEventListener('input', ()=>{ if(state.cards.length) generateSheets(); });
 document.getElementById('printBtn').addEventListener('click', ()=>window.print());
@@ -436,7 +465,7 @@ function setPageStyle(w, h){
     document.head.appendChild(styleEl);
   }
   styleEl.textContent = `
-    @media print { @page { size: ${w}cm ${h}cm; margin:0; } }
+    @media print { @page { size: ${w}cm ${h}cm; margin:0.5mm; } }
   `;
 }
 
@@ -452,6 +481,8 @@ function generateSheets(){
   const male = sortForPrint(state.cards.filter(c=>c.gender==='M'));
   const female = sortForPrint(state.cards.filter(c=>c.gender==='F'));
   const cutGuide = document.getElementById('cutGuide').checked;
+  const cardBorder = document.getElementById('cardBorder').checked;
+  const cardGap = document.getElementById('cardGap').value === 'gap';
 
   const sheetsEl = document.getElementById('sheets');
   sheetsEl.innerHTML = '';
@@ -470,15 +501,19 @@ function generateSheets(){
 
   const maleChunks = chunk(male, capacity);
   const femaleChunks = chunk(female, capacity);
+  const pageCount = Math.max(maleChunks.length, femaleChunks.length, male.length||female.length ? 1 : 0);
 
-  maleChunks.forEach((group,i)=>{
-    sheetsEl.appendChild(makeLabel(`${paperKey}${orientLabel} 正面 — 男生${maleChunks.length>1? ` (第${i+1}張)`:''}`));
-    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity, titleText, hasTitle));
-  });
-  femaleChunks.forEach((group,i)=>{
-    sheetsEl.appendChild(makeLabel(`${paperKey}${orientLabel} 反面 — 女生${femaleChunks.length>1? ` (第${i+1}張)`:''}`));
-    sheetsEl.appendChild(makeSheet(group, cutGuide, p, capacity, titleText, hasTitle));
-  });
+  // 交錯排列成「男1、女1、男2、女2…」,雙面列印時正面/反面才會正確對齊。
+  // 若某一邊該張沒有資料，補一張全空白頁維持頁碼對齊。
+  for(let i=0;i<pageCount;i++){
+    const mGroup = maleChunks[i] || [];
+    sheetsEl.appendChild(makeLabel(`${paperKey}${orientLabel} 正面 — 男生${pageCount>1? ` (第${i+1}張)`:''}`));
+    sheetsEl.appendChild(makeSheet(mGroup, cutGuide, p, capacity, titleText, hasTitle, cardBorder, cardGap));
+
+    const fGroup = femaleChunks[i] || [];
+    sheetsEl.appendChild(makeLabel(`${paperKey}${orientLabel} 反面 — 女生${pageCount>1? ` (第${i+1}張)`:''}`));
+    sheetsEl.appendChild(makeSheet(fGroup, cutGuide, p, capacity, titleText, hasTitle, cardBorder, cardGap));
+  }
 
   document.getElementById('printBtn').disabled = (male.length===0 && female.length===0);
   sheetsEl.scrollIntoView({behavior:'smooth'});
@@ -498,9 +533,9 @@ function makeLabel(text){
   return d;
 }
 
-function makeSheet(cards, cutGuide, p, capacity, titleText, hasTitle){
+function makeSheet(cards, cutGuide, p, capacity, titleText, hasTitle, cardBorder, cardGap){
   const sheet = document.createElement('div');
-  sheet.className = 'sheet';
+  sheet.className = 'sheet' + (cardBorder? ' card-border':'');
   sheet.style.width = p.w + 'cm';
   sheet.style.height = p.h + 'cm';
 
@@ -508,7 +543,7 @@ function makeSheet(cards, cutGuide, p, capacity, titleText, hasTitle){
     const titleEl = document.createElement('div');
     titleEl.className = 'sheet-title';
     titleEl.style.height = p.titleH + 'cm';
-    titleEl.style.fontSize = '22px';
+    titleEl.style.fontSize = '26px';
     titleEl.textContent = titleText;
     sheet.appendChild(titleEl);
   }
@@ -519,7 +554,7 @@ function makeSheet(cards, cutGuide, p, capacity, titleText, hasTitle){
   grid.style.setProperty('--rows', p.rows);
   for(let i=0;i<capacity;i++){
     const slot = document.createElement('div');
-    slot.className='card-slot';
+    slot.className='card-slot' + (cardGap? ' gapped':'');
     if(cards[i]){
       const img = document.createElement('img');
       img.src = cards[i].url;
